@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { interviewAPI, planAPI } from '../services/api';
+import { interviewAPI } from '../services/api';
 import { speechRecognition, speechSynthesis } from '../ai/config/speechService';
-import { Mic, MicOff, X, Settings, MoreVertical } from 'lucide-react';
-import './Interview.css';
+import { Mic, MicOff, X, Settings, MoreVertical, Code, PenTool, Play } from 'lucide-react';
+import './AIPanelInterview.css';
 
-const Interview = () => {
+const AIPanelInterview = () => {
     const { sessionId } = useParams();
     const navigate = useNavigate();
     const { user } = useAuth();
@@ -25,6 +25,18 @@ const Interview = () => {
     const [isThinking, setIsThinking] = useState(false);
     const [elapsedTime, setElapsedTime] = useState(0);
 
+    // Panel states - AI can activate these
+    const [showCodeEditor, setShowCodeEditor] = useState(false);
+    const [showDrawingCanvas, setShowDrawingCanvas] = useState(false);
+    const [codeContent, setCodeContent] = useState('');
+    const [activePanel, setActivePanel] = useState(null); // 'code', 'draw', or null
+
+    // Drawing canvas states
+    const canvasRef = useRef(null);
+    const [isDrawing, setIsDrawing] = useState(false);
+    const [drawColor, setDrawColor] = useState('#ffffff');
+    const [drawSize, setDrawSize] = useState(3);
+
     const transcriptTimeoutRef = useRef(null);
     const timerRef = useRef(null);
     const transcriptEndRef = useRef(null);
@@ -40,11 +52,22 @@ const Interview = () => {
     }, [sessionId]);
 
     useEffect(() => {
-        // Auto-scroll to bottom of transcript
         if (transcriptEndRef.current) {
             transcriptEndRef.current.scrollIntoView({ behavior: 'smooth' });
         }
     }, [transcriptions]);
+
+    // Initialize canvas
+    useEffect(() => {
+        if (showDrawingCanvas && canvasRef.current) {
+            const canvas = canvasRef.current;
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            ctx.fillStyle = '#1a1a1a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+    }, [showDrawingCanvas]);
 
     const fetchSession = async () => {
         try {
@@ -102,7 +125,6 @@ const Interview = () => {
         }
     };
 
-    // Use ref to track accumulated transcript for the timeout handler
     const transcriptRef = useRef('');
     useEffect(() => {
         transcriptRef.current = currentTranscript;
@@ -115,13 +137,31 @@ const Interview = () => {
         }
     };
 
+    // AI can activate code editor or drawing canvas
+    const activateCodeEditor = () => {
+        setShowCodeEditor(true);
+        setShowDrawingCanvas(false);
+        setActivePanel('code');
+    };
+
+    const activateDrawingCanvas = () => {
+        setShowDrawingCanvas(true);
+        setShowCodeEditor(false);
+        setActivePanel('draw');
+    };
+
+    const closeActivePanel = () => {
+        setShowCodeEditor(false);
+        setShowDrawingCanvas(false);
+        setActivePanel(null);
+    };
+
     const startListening = () => {
         if (!speechRecognition.isSupported()) {
             setError('Speech recognition not supported in this browser.');
             return;
         }
 
-        // Don't start if already listening/thinking/speaking
         if (isListening || isThinking || isSpeaking) return;
 
         setCurrentTranscript('');
@@ -138,27 +178,17 @@ const Interview = () => {
                         return newText;
                     });
 
-                    // Reset silence timer logic
                     if (transcriptTimeoutRef.current) {
                         clearTimeout(transcriptTimeoutRef.current);
                     }
 
-                    // Smart delay: 1.5s silence before sending
                     transcriptTimeoutRef.current = setTimeout(() => {
-                        // Use the latest value from state setter isn't reliable inside timeout closure
-                        // so we pass the text directly or use a ref. 
-                        // But here we can use the result.final if we accumulate it?
-                        // Actually, we need the FULL transcript accumulated so far.
-                        // Let's use a ref for current transcript to be safe.
                         handleSendUserMessage();
                     }, 1500);
                 }
             },
             () => {
-                // On End: Restart if we are supposed to be active and not processing
-                // But only if we are in ACTIVE state and NOT speaking/thinking
                 if (status === 'ACTIVE' && !isSpeaking && !isThinking) {
-                    // Small delay to prevent CPU thrashing
                     setTimeout(() => {
                         if (status === 'ACTIVE' && !isSpeaking && !isThinking) {
                             startListening();
@@ -184,10 +214,8 @@ const Interview = () => {
         }
     };
 
-    // Auto-restart listening when AI finishes speaking/thinking
     useEffect(() => {
         if (status === 'ACTIVE' && !isSpeaking && !isThinking && !isListening) {
-            // Small delay to ensure clean state transition
             const timer = setTimeout(() => {
                 if (status === 'ACTIVE' && !isSpeaking && !isThinking && !isListening) {
                     startListening();
@@ -218,6 +246,14 @@ const Interview = () => {
             if (response.data && response.data.aiResponse) {
                 const aiResponse = response.data.aiResponse;
 
+                // Check if AI wants to activate code editor or drawing canvas
+                const lowerResponse = aiResponse.toLowerCase();
+                if (lowerResponse.includes('write code') || lowerResponse.includes('code editor') || lowerResponse.includes('dsa code')) {
+                    activateCodeEditor();
+                } else if (lowerResponse.includes('draw') || lowerResponse.includes('sketch') || lowerResponse.includes('diagram')) {
+                    activateDrawingCanvas();
+                }
+
                 const aiTranscription = {
                     speaker: 'AI',
                     text: aiResponse,
@@ -231,7 +267,6 @@ const Interview = () => {
             console.error('Failed to send message:', error);
         } finally {
             setIsThinking(false);
-            // Effect will handle restart
         }
     };
 
@@ -252,6 +287,41 @@ const Interview = () => {
         }
     };
 
+    // Drawing functions
+    const startDrawing = (e) => {
+        if (!showDrawingCanvas) return;
+        setIsDrawing(true);
+        const canvas = canvasRef.current;
+        const rect = canvas.getBoundingClientRect();
+        const ctx = canvas.getContext('2d');
+        ctx.beginPath();
+        ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+    };
+
+    const draw = (e) => {
+        if (!isDrawing || !showDrawingCanvas) return;
+        const canvas = canvasRef.current;
+        const rect = canvas.getBoundingClientRect();
+        const ctx = canvas.getContext('2d');
+        ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+        ctx.strokeStyle = drawColor;
+        ctx.lineWidth = drawSize;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.stroke();
+    };
+
+    const stopDrawing = () => {
+        setIsDrawing(false);
+    };
+
+    const clearCanvas = () => {
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#1a1a1a';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    };
+
     const endInterview = async () => {
         if (timerRef.current) clearInterval(timerRef.current);
         stopListening();
@@ -260,30 +330,21 @@ const Interview = () => {
         try {
             await interviewAPI.endInterview(sessionId, '');
             setStatus('ENDED');
-
-            // Check for pending task completion
-            const taskInfoStr = localStorage.getItem('pendingTaskCompletion');
-            if (taskInfoStr) {
-                try {
-                    const taskInfo = JSON.parse(taskInfoStr);
-                    await planAPI.markTaskComplete(taskInfo);
-                    localStorage.removeItem('pendingTaskCompletion');
-                    console.log('Plan task marked as complete');
-                } catch (taskError) {
-                    console.error('Failed to mark task complete:', taskError);
-                }
-            }
-
-            setTimeout(() => navigate(`/interview-scorecard/${sessionId}`), 1000);
+            setTimeout(() => navigate('/dashboard'), 2000);
         } catch (error) {
             console.error('Failed to end interview:', error);
-            navigate(`/interview-scorecard/${sessionId}`);
         }
+    };
+
+    const handleTestScreen = () => {
+        console.log('Test Screen Button Clicked');
+        // This will be implemented later
+        alert('Test functionality will be implemented soon!');
     };
 
     if (loading) {
         return (
-            <div className="interview-fullscreen">
+            <div className="ai-interview-fullscreen">
                 <div className="loading-container">
                     <div className="loading-spinner"></div>
                     <p>Loading interview...</p>
@@ -294,7 +355,7 @@ const Interview = () => {
 
     if (error || !session) {
         return (
-            <div className="interview-fullscreen">
+            <div className="ai-interview-fullscreen">
                 <div className="error-container">
                     <h2>Unable to load interview</h2>
                     <p>{error || 'Session not found'}</p>
@@ -308,7 +369,7 @@ const Interview = () => {
 
     if (status === 'IDLE') {
         return (
-            <div className="interview-fullscreen">
+            <div className="ai-interview-fullscreen">
                 <div className="pre-interview">
                     <div className="pre-interview-content">
                         <h1>Ready to begin?</h1>
@@ -332,7 +393,7 @@ const Interview = () => {
 
     if (status === 'CONNECTING') {
         return (
-            <div className="interview-fullscreen">
+            <div className="ai-interview-fullscreen">
                 <div className="loading-container">
                     <div className="loading-spinner"></div>
                     <p>Connecting to AI interviewer...</p>
@@ -343,7 +404,7 @@ const Interview = () => {
 
     if (status === 'ENDED') {
         return (
-            <div className="interview-fullscreen">
+            <div className="ai-interview-fullscreen">
                 <div className="ended-container">
                     <div className="success-check">✓</div>
                     <h2>Interview Complete</h2>
@@ -354,7 +415,7 @@ const Interview = () => {
     }
 
     return (
-        <div className="interview-fullscreen">
+        <div className="ai-interview-fullscreen">
             {/* Top Bar */}
             <div className="interview-topbar">
                 <div className="topbar-left">
@@ -412,6 +473,90 @@ const Interview = () => {
                     </div>
                 </div>
 
+                {/* Code Editor Panel - Activated by AI */}
+                {showCodeEditor && (
+                    <div className="code-editor-panel">
+                        <div className="panel-header">
+                            <div className="panel-title">
+                                <Code size={18} />
+                                <span>Code Editor</span>
+                            </div>
+                            <button className="panel-close" onClick={closeActivePanel}>
+                                <X size={18} />
+                            </button>
+                        </div>
+                        <div className="code-editor-container">
+                            <textarea
+                                className="code-editor"
+                                value={codeContent}
+                                onChange={(e) => setCodeContent(e.target.value)}
+                                placeholder="Write your DSA code here..."
+                                spellCheck={false}
+                            />
+                        </div>
+                        <div className="code-editor-footer">
+                            <select 
+                                className="language-select"
+                                defaultValue="javascript"
+                            >
+                                <option value="javascript">JavaScript</option>
+                                <option value="python">Python</option>
+                                <option value="java">Java</option>
+                                <option value="cpp">C++</option>
+                            </select>
+                            <button className="run-code-btn">
+                                <Play size={16} />
+                                Run Code
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* Drawing Canvas Panel - Activated by AI */}
+                {showDrawingCanvas && (
+                    <div className="drawing-panel">
+                        <div className="panel-header">
+                            <div className="panel-title">
+                                <PenTool size={18} />
+                                <span>Drawing Canvas</span>
+                            </div>
+                            <button className="panel-close" onClick={closeActivePanel}>
+                                <X size={18} />
+                            </button>
+                        </div>
+                        <div className="drawing-toolbar">
+                            <input
+                                type="color"
+                                value={drawColor}
+                                onChange={(e) => setDrawColor(e.target.value)}
+                                className="color-picker"
+                            />
+                            <input
+                                type="range"
+                                min="1"
+                                max="10"
+                                value={drawSize}
+                                onChange={(e) => setDrawSize(parseInt(e.target.value))}
+                                className="brush-size"
+                            />
+                            <span className="brush-size-label">{drawSize}px</span>
+                            <button className="clear-btn" onClick={clearCanvas}>
+                                Clear
+                            </button>
+                        </div>
+                        <div className="canvas-container">
+                            <canvas
+                                ref={canvasRef}
+                                className="drawing-canvas"
+                                onMouseDown={startDrawing}
+                                onMouseMove={draw}
+                                onMouseUp={stopDrawing}
+                                onMouseLeave={stopDrawing}
+                            />
+                        </div>
+                    </div>
+                )}
+
                 {/* Transcript Panel */}
                 <div className="transcript-panel">
                     <div className="transcript-header">
@@ -458,8 +603,7 @@ const Interview = () => {
                 <div className="controls-container">
                     <button
                         className={`control-btn mic ${isListening ? 'active' : ''}`}
-                        title={isListening ? 'Listening' : 'Microphone Off'}
-                        disabled
+                        title={isListening ? 'Mute' : 'Unmute'}
                     >
                         {isListening ? <Mic size={24} /> : <MicOff size={24} />}
                     </button>
@@ -467,10 +611,20 @@ const Interview = () => {
                     <button
                         className="control-btn end"
                         onClick={endInterview}
-                        title="End Interview"
+                        title="Leave Interview"
                     >
-                        <X size={20} />
-                        <span>End Interview</span>
+                        <X size={24} />
+                        <span>End</span>
+                    </button>
+
+                    {/* Test Button */}
+                    <button
+                        className="control-btn test"
+                        onClick={handleTestScreen}
+                        title="Test Screen"
+                    >
+                        <Play size={24} />
+                        <span>Test</span>
                     </button>
                 </div>
             </div>
@@ -478,4 +632,4 @@ const Interview = () => {
     );
 };
 
-export default Interview;
+export default AIPanelInterview;

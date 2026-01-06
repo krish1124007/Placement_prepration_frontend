@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import DashboardLayout from '../components/DashboardLayout';
@@ -14,7 +14,9 @@ import {
     User,
     Share2,
     Mic,
-    ClipboardList
+    ClipboardList,
+    Play,
+    AlertCircle
 } from 'lucide-react';
 import './Dashboard.css';
 
@@ -22,10 +24,87 @@ const Dashboard = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
     const [showInterviewModal, setShowInterviewModal] = useState(false);
+    const [modalPrefillData, setModalPrefillData] = useState(null);
+    const [scheduledInterviews, setScheduledInterviews] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        if (user?._id) {
+            fetchScheduledInterviews();
+        }
+    }, [user]);
+
+    const fetchScheduledInterviews = async () => {
+        try {
+            // Fetch user's plans
+            const response = await fetch(`http://localhost:3000/api/v1/plans/user/${user._id}`);
+            const data = await response.json();
+
+            if (data.success && data.data) {
+                const today = new Date().toISOString().split('T')[0];
+                const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+
+                const interviews = [];
+
+                // Check DSA interviews
+                if (data.data.dsa && Array.isArray(data.data.dsa)) {
+                    data.data.dsa.forEach(item => {
+                        if (item.date) {
+                            interviews.push({
+                                type: 'dsa',
+                                topic: item.topic || 'DSA Interview',
+                                date: item.date,
+                                isToday: item.date === today,
+                                isTomorrow: item.date === tomorrow
+                            });
+                        }
+                    });
+                }
+
+                // Check aptitude interviews (if they exist)
+                if (data.data.aptitude && Array.isArray(data.data.aptitude)) {
+                    data.data.aptitude.forEach(item => {
+                        if (item.date) {
+                            interviews.push({
+                                type: 'normal',
+                                topic: item.topic || 'Aptitude Interview',
+                                date: item.date,
+                                isToday: item.date === today,
+                                isTomorrow: item.date === tomorrow
+                            });
+                        }
+                    });
+                }
+
+                // Sort by date
+                interviews.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+                setScheduledInterviews(interviews);
+            }
+        } catch (error) {
+            console.error('Failed to fetch scheduled interviews:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleStartScheduledInterview = (interview) => {
+        // Prefill the modal with interview data
+        setModalPrefillData({
+            topic: interview.topic,
+            level: 'Mid-Level', // Default level, can be customized
+            interviewType: interview.type,
+            description: `Scheduled interview for ${interview.topic}`
+        });
+        setShowInterviewModal(true);
+    };
 
     const handleViewProfile = () => {
         navigate('/profile');
     };
+
+    const todayInterviews = scheduledInterviews.filter(i => i.isToday);
+    const tomorrowInterviews = scheduledInterviews.filter(i => i.isTomorrow);
 
     return (
         <DashboardLayout>
@@ -38,7 +117,10 @@ const Dashboard = () => {
                 <div className="quick-actions">
                     <button
                         className="action-button quick-interview"
-                        onClick={() => setShowInterviewModal(true)}
+                        onClick={() => {
+                            setModalPrefillData(null);
+                            setShowInterviewModal(true);
+                        }}
                     >
                         <Mic size={20} />
                         Quick Interview
@@ -52,6 +134,67 @@ const Dashboard = () => {
                     </button>
                 </div>
             </section>
+
+            {/* Scheduled Interviews Alert */}
+            {(todayInterviews.length > 0 || tomorrowInterviews.length > 0) && (
+                <section className="scheduled-interviews-section">
+                    {todayInterviews.length > 0 && (
+                        <div className="interview-alert today">
+                            <div className="alert-header">
+                                <AlertCircle size={24} />
+                                <h3>Today's Interviews</h3>
+                            </div>
+                            <div className="interview-list">
+                                {todayInterviews.map((interview, idx) => (
+                                    <div key={idx} className="interview-card">
+                                        <div className="interview-info">
+                                            <div className="interview-icon">
+                                                {interview.type === 'dsa' ? <Code size={20} /> : <Mic size={20} />}
+                                            </div>
+                                            <div className="interview-details">
+                                                <h4>{interview.topic}</h4>
+                                                <p>{interview.type === 'dsa' ? 'DSA Interview' : 'Normal Interview'}</p>
+                                            </div>
+                                        </div>
+                                        <button
+                                            className="start-interview-btn"
+                                            onClick={() => handleStartScheduledInterview(interview)}
+                                        >
+                                            <Play size={16} />
+                                            Start Interview
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {tomorrowInterviews.length > 0 && (
+                        <div className="interview-alert tomorrow">
+                            <div className="alert-header">
+                                <Calendar size={24} />
+                                <h3>Tomorrow's Interviews</h3>
+                            </div>
+                            <div className="interview-list">
+                                {tomorrowInterviews.map((interview, idx) => (
+                                    <div key={idx} className="interview-card">
+                                        <div className="interview-info">
+                                            <div className="interview-icon">
+                                                {interview.type === 'dsa' ? <Code size={20} /> : <Mic size={20} />}
+                                            </div>
+                                            <div className="interview-details">
+                                                <h4>{interview.topic}</h4>
+                                                <p>{interview.type === 'dsa' ? 'DSA Interview' : 'Normal Interview'}</p>
+                                            </div>
+                                        </div>
+                                        <span className="interview-date">Tomorrow</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </section>
+            )}
 
             {/* Stats Grid */}
             <section className="stats-grid">
@@ -80,7 +223,7 @@ const Dashboard = () => {
                         <Calendar size={24} />
                     </div>
                     <div className="stat-content">
-                        <h3>3</h3>
+                        <h3>{scheduledInterviews.length}</h3>
                         <p>Upcoming Sessions</p>
                     </div>
                 </div>
@@ -200,48 +343,16 @@ const Dashboard = () => {
                         </div>
                     </div>
                 </div>
-
-                {/* Upcoming Sessions Card */}
-                <div className="content-card full-width">
-                    <div className="card-header">
-                        <h2>Upcoming Sessions</h2>
-                        <button className="text-button">
-                            View All <ChevronRight size={18} />
-                        </button>
-                    </div>
-                    <div className="card-body">
-                        <div className="sessions-list">
-                            <div className="session-item">
-                                <div className="session-date">
-                                    <span className="day">15</span>
-                                    <span className="month">Jan</span>
-                                </div>
-                                <div className="session-details">
-                                    <h4>Technical Interview Prep</h4>
-                                    <p>With John Doe • 2:00 PM - 3:30 PM</p>
-                                </div>
-                                <button className="session-button">Join</button>
-                            </div>
-                            <div className="session-item">
-                                <div className="session-date">
-                                    <span className="day">18</span>
-                                    <span className="month">Jan</span>
-                                </div>
-                                <div className="session-details">
-                                    <h4>HR Interview Practice</h4>
-                                    <p>With Jane Smith • 10:00 AM - 11:00 AM</p>
-                                </div>
-                                <button className="session-button">Join</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
 
             {/* Interview Setup Modal */}
             <InterviewSetupModal
                 isOpen={showInterviewModal}
-                onClose={() => setShowInterviewModal(false)}
+                onClose={() => {
+                    setShowInterviewModal(false);
+                    setModalPrefillData(null);
+                }}
+                prefillData={modalPrefillData}
             />
         </DashboardLayout>
     );

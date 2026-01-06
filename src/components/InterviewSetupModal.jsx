@@ -2,17 +2,18 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { interviewAPI } from '../services/api';
-import { X, Mic, ArrowRight } from 'lucide-react';
+import { X, Mic, ArrowRight, Code } from 'lucide-react';
 import './InterviewSetupModal.css';
 
-const InterviewSetupModal = ({ isOpen, onClose }) => {
+const InterviewSetupModal = ({ isOpen, onClose, prefillData = null }) => {
     const navigate = useNavigate();
     const { user } = useAuth();
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
-        topic: '',
-        description: '',
-        level: 'Mid-Level'
+        topic: prefillData?.topic || '',
+        description: prefillData?.description || '',
+        level: prefillData?.level || 'Mid-Level',
+        interviewType: prefillData?.interviewType || 'normal' // 'normal' or 'dsa'
     });
 
     const handleChange = (e) => {
@@ -31,17 +32,36 @@ const InterviewSetupModal = ({ isOpen, onClose }) => {
 
         setLoading(true);
         try {
-            const response = await interviewAPI.createSession({
-                userId: user._id,
-                topic: formData.topic,
-                description: formData.description,
-                level: formData.level,
-                tone: 'Professional'
-            });
+            if (formData.interviewType === 'dsa') {
+                // Create DSA interview session
+                const response = await fetch('http://localhost:3000/api/v1/dsa-interviews/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: user._id,
+                        topic: formData.topic,
+                        level: formData.level
+                    })
+                });
 
-            if (response.data) {
-                // Navigate to interview page with session ID
-                navigate(`/interview/${response.data._id}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    navigate(`/dsa-interview/${data.data._id}`);
+                }
+            } else {
+                // Create normal interview session
+                const response = await interviewAPI.createSession({
+                    userId: user._id,
+                    topic: formData.topic,
+                    description: formData.description,
+                    level: formData.level,
+                    tone: 'Professional'
+                });
+
+                if (response.data) {
+                    navigate(`/interview/${response.data._id}`);
+                }
             }
         } catch (error) {
             console.error('Failed to create interview session:', error);
@@ -70,6 +90,26 @@ const InterviewSetupModal = ({ isOpen, onClose }) => {
 
                 <form onSubmit={handleSubmit} className="modal-form">
                     <div className="form-group">
+                        <label htmlFor="interviewType">Interview Type *</label>
+                        <select
+                            id="interviewType"
+                            name="interviewType"
+                            value={formData.interviewType}
+                            onChange={handleChange}
+                            required
+                            disabled={loading}
+                        >
+                            <option value="normal">Normal Interview</option>
+                            <option value="dsa">DSA Interview</option>
+                        </select>
+                        <small className="form-hint">
+                            {formData.interviewType === 'dsa'
+                                ? 'DSA interviews include preliminary questions and coding challenges'
+                                : 'Normal interviews are conversational with the AI interviewer'}
+                        </small>
+                    </div>
+
+                    <div className="form-group">
                         <label htmlFor="topic">Interview Topic / Position *</label>
                         <input
                             type="text"
@@ -77,7 +117,7 @@ const InterviewSetupModal = ({ isOpen, onClose }) => {
                             name="topic"
                             value={formData.topic}
                             onChange={handleChange}
-                            placeholder="e.g., Frontend Developer, Data Scientist"
+                            placeholder={formData.interviewType === 'dsa' ? 'e.g., Arrays, Trees, Graphs' : 'e.g., Frontend Developer, Data Scientist'}
                             required
                             disabled={loading}
                         />
@@ -92,8 +132,11 @@ const InterviewSetupModal = ({ isOpen, onClose }) => {
                             onChange={handleChange}
                             placeholder="Add any specific topics or areas you want to focus on..."
                             rows="3"
-                            disabled={loading}
+                            disabled={loading || formData.interviewType === 'dsa'}
                         />
+                        {formData.interviewType === 'dsa' && (
+                            <small className="form-hint">Description not needed for DSA interviews</small>
+                        )}
                     </div>
 
                     <div className="form-group">

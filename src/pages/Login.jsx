@@ -151,14 +151,13 @@ const Login = () => {
             if (response.status === 200 && response.data) {
                 const { token, ...userData } = response.data;
 
-                login(token, userData);
-
                 // Calculate remaining time to ensure animation plays for full duration
                 const elapsedTime = Date.now() - startTime;
                 const remainingTime = Math.max(0, minAnimationDuration - elapsedTime);
 
-                // Wait for animation to complete before navigation
+                // Wait for animation to complete before updating auth state and navigating
                 setTimeout(() => {
+                    login(token, userData);
                     navigate('/dashboard');
                 }, remainingTime);
             }
@@ -180,13 +179,22 @@ const Login = () => {
         onSuccess: async (tokenResponse) => {
             try {
                 setLoading(true);
+                const startTime = Date.now();
+                const minAnimationDuration = 1500;
+
                 // Send the access token to your backend
                 const response = await authAPI.googleLogin(tokenResponse.access_token);
 
                 if (response.status === 200 && response.data) {
                     const { token, ...userData } = response.data;
-                    login(token, userData);
-                    navigate('/dashboard');
+
+                    const elapsedTime = Date.now() - startTime;
+                    const remainingTime = Math.max(0, minAnimationDuration - elapsedTime);
+
+                    setTimeout(() => {
+                        login(token, userData);
+                        navigate('/dashboard');
+                    }, remainingTime);
                 }
             } catch (err) {
                 setError('Google login failed. Please try again.');

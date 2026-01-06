@@ -9,9 +9,14 @@ import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import Portfolio from "./pages/Portfolio";
 import Socials from "./pages/Socials";
-import Plans from "./pages/Plans";
+import PlansNew from "./pages/PlansNew";
+import PlanRoadmap from "./pages/PlanRoadmap";
 import Schedule from "./pages/Schedule";
+import History from "./pages/History";
 import Interview from "./pages/Interview";
+import DSAInterview from "./pages/DSAInterview";
+import InterviewScorecard from "./pages/InterviewScorecard";
+import AIPanelInterview from "./pages/AIPanelInterview";
 import GitHubCallback from "./pages/GitHubCallback";
 import "./App.css";
 
@@ -57,7 +62,7 @@ function App() {
                 path="/plans"
                 element={
                   <ProtectedRoute>
-                    <Plans />
+                    <PlansNew />
                   </ProtectedRoute>
                 }
               />
@@ -78,10 +83,50 @@ function App() {
                 }
               />
               <Route
+                path="/dsa-interview/:sessionId"
+                element={
+                  <ProtectedRoute>
+                    <DSAInterview />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/interview-scorecard/:sessionId"
+                element={
+                  <ProtectedRoute>
+                    <InterviewScorecard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/ai-panel-interview/:sessionId"
+                element={
+                  <ProtectedRoute>
+                    <AIPanelInterview />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path="/github-callback"
                 element={
                   <ProtectedRoute>
                     <GitHubCallback />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/history"
+                element={
+                  <ProtectedRoute>
+                    <History />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/plan-roadmap/:id"
+                element={
+                  <ProtectedRoute>
+                    <PlanRoadmap />
                   </ProtectedRoute>
                 }
               />

@@ -186,6 +186,14 @@
     color: #b2bec3;
 }
 
+.form-hint {
+    display: block;
+    font-size: 13px;
+    color: #636e72;
+    margin-top: 6px;
+    font-weight: 500;
+}
+
 .modal-submit-button {
     width: 100%;
     background: #00b894;

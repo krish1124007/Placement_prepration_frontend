@@ -7,7 +7,7 @@ import {
     BookOpen,
     Trophy,
     Calendar,
-    Settings,
+    History,
     LogOut,
     Briefcase,
     Share2,
@@ -27,7 +27,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         { id: 'achievements', label: 'Achievements', icon: Trophy, path: '/achievements' },
         { id: 'socials', label: 'Socials', icon: Share2, path: '/socials' },
         { id: 'schedule', label: 'Schedule', icon: Calendar, path: '/schedule' },
-        { id: 'settings', label: 'Settings', icon: Settings, path: '/settings' },
+        { id: 'history', label: 'History', icon: History, path: '/history' },
     ];
 
     const handleLogout = () => {

@@ -1,8 +1,8 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://placement-prepration-backend.onrender.com/api/v1';
-
-
+// const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://placement-prepration-backend.onrender.com/api/v1';
+const API_BASE_URL = 'http://localhost:8000/api/v1';
+// 
 const api = axios.create({
     baseURL: API_BASE_URL,
     headers: {
@@ -147,6 +147,16 @@ export const planAPI = {
 
     getScheduleTasks: async () => {
         const response = await api.get('/plans/getscheduletasks');
+        return response.data;
+    },
+
+    updateTaskCompletion: async (planId, taskData) => {
+        const response = await api.put(`/plans/updatetask/${planId}`, taskData);
+        return response.data;
+    },
+
+    markTaskComplete: async (taskData) => {
+        const response = await api.post('/plans/markcomplete', taskData);
         return response.data;
     },
 };
