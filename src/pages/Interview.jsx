@@ -237,6 +237,7 @@ const Interview = () => {
 
     const speakText = async (text) => {
         setIsSpeaking(true);
+        stopListening(); // Enforce stop immediately
 
         try {
             await speechSynthesis.speak(text, {
@@ -257,9 +258,11 @@ const Interview = () => {
         stopListening();
         speechSynthesis.cancel();
 
+        // Immediate UI update to prevent "not working" feeling
+        setStatus('ENDED');
+
         try {
             await interviewAPI.endInterview(sessionId, '');
-            setStatus('ENDED');
 
             // Check for pending task completion
             const taskInfoStr = localStorage.getItem('pendingTaskCompletion');

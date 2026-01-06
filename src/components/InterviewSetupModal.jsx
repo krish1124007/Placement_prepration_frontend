@@ -5,6 +5,8 @@ import { interviewAPI } from '../services/api';
 import { X, Mic, ArrowRight, Code } from 'lucide-react';
 import './InterviewSetupModal.css';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://placement-prepration-backend.onrender.com/api/v1';
+
 const InterviewSetupModal = ({ isOpen, onClose, prefillData = null }) => {
     const navigate = useNavigate();
     const { user } = useAuth();
@@ -34,7 +36,7 @@ const InterviewSetupModal = ({ isOpen, onClose, prefillData = null }) => {
         try {
             if (formData.interviewType === 'dsa') {
                 // Create DSA interview session
-                const response = await fetch('http://localhost:3000/api/v1/dsa-interviews/create', {
+                const response = await fetch(`${API_BASE_URL}/dsa-interviews/create`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
