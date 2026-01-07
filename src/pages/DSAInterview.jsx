@@ -114,7 +114,7 @@ const DSAInterview = () => {
 
     const fetchSession = async () => {
         try {
-            const response = await fetch(`http://localhost:8000/api/v1/dsa-interviews/session/${sessionId}`);
+            const response = await fetch(`https://placement-prepration-backend.onrender.com/api/v1/dsa-interviews/session/${sessionId}`);
             const data = await response.json();
 
             if (data.success || data.status === 200) {
@@ -142,7 +142,7 @@ const DSAInterview = () => {
 
     const startPreliminary = async () => {
         try {
-            const response = await fetch(`http://localhost:8000/api/v1/dsa-interviews/preliminary/start/${sessionId}`, {
+            const response = await fetch(`https://placement-prepration-backend.onrender.com/api/v1/dsa-interviews/preliminary/start/${sessionId}`, {
                 method: 'POST'
             });
             const data = await response.json();
@@ -180,7 +180,7 @@ const DSAInterview = () => {
 
     const completePreliminary = async (answers) => {
         try {
-            const response = await fetch(`http://localhost:8000/api/v1/dsa-interviews/preliminary/submit/${sessionId}`, {
+            const response = await fetch(`https://placement-prepration-backend.onrender.com/api/v1/dsa-interviews/preliminary/submit/${sessionId}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ answers })
@@ -198,7 +198,7 @@ const DSAInterview = () => {
 
     const startCoding = async () => {
         try {
-            const response = await fetch(`http://localhost:8000/api/v1/dsa-interviews/coding/start/${sessionId}`, {
+            const response = await fetch(`https://placement-prepration-backend.onrender.com/api/v1/dsa-interviews/coding/start/${sessionId}`, {
                 method: 'POST'
             });
             const data = await response.json();
@@ -240,7 +240,7 @@ const DSAInterview = () => {
         }
 
         try {
-            const response = await fetch(`http://localhost:8000/api/v1/dsa-interviews/coding/submit/${sessionId}`, {
+            const response = await fetch(`https://placement-prepration-backend.onrender.com/api/v1/dsa-interviews/coding/submit/${sessionId}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -271,7 +271,7 @@ const DSAInterview = () => {
         if (timerRef.current) clearInterval(timerRef.current);
 
         try {
-            const response = await fetch(`http://localhost:8000/api/v1/dsa-interviews/complete/${sessionId}`, {
+            const response = await fetch(`https://placement-prepration-backend.onrender.com/api/v1/dsa-interviews/complete/${sessionId}`, {
                 method: 'POST'
             });
             const data = await response.json();
@@ -300,7 +300,7 @@ const DSAInterview = () => {
 
     const fetchScorecard = async () => {
         try {
-            const response = await fetch(`http://localhost:8000/api/v1/dsa-interviews/scorecard/${sessionId}`);
+            const response = await fetch(`https://placement-prepration-backend.onrender.com/api/v1/dsa-interviews/scorecard/${sessionId}`);
             const data = await response.json();
 
             if (data.success || data.status === 200) {

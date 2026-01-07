@@ -37,7 +37,7 @@ const Dashboard = () => {
     const fetchScheduledInterviews = async () => {
         try {
             // Fetch user's plans
-            const response = await fetch(`http://localhost:3000/api/v1/plans/user/${user._id}`);
+            const response = await fetch(`https://placement-prepration-backend.onrender.com/api/v1/plans/user/${user._id}`);
             const data = await response.json();
 
             if (data.success && data.data) {
