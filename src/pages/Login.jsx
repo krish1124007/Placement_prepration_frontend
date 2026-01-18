@@ -4,6 +4,7 @@ import { useGoogleLogin } from '@react-oauth/google';
 import { authAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { Eye, EyeOff, ChevronDown, Briefcase, Send } from 'lucide-react';
+import { SnowEffect, Snowman } from '../components/SnowEffect';
 import './Login.css';
 
 const Login = () => {
@@ -155,10 +156,13 @@ const Login = () => {
                 const elapsedTime = Date.now() - startTime;
                 const remainingTime = Math.max(0, minAnimationDuration - elapsedTime);
 
-                // Wait for animation to complete before updating auth state and navigating
+                // Wait for animation to complete before showing system loading
                 setTimeout(() => {
-                    login(token, userData);
-                    navigate('/dashboard');
+                    setLoading(false);
+                    // Check if user has seen onboarding before
+                    const hasSeenOnboarding = localStorage.getItem('hasSeenOnboarding');
+                    // Pass showLoading=true to trigger system loading animation
+                    login(token, userData, !hasSeenOnboarding, true);
                 }, remainingTime);
             }
         } catch (err) {
@@ -192,8 +196,11 @@ const Login = () => {
                     const remainingTime = Math.max(0, minAnimationDuration - elapsedTime);
 
                     setTimeout(() => {
-                        login(token, userData);
-                        navigate('/dashboard');
+                        setLoading(false);
+                        // Check if user has seen onboarding before
+                        const hasSeenOnboarding = localStorage.getItem('hasSeenOnboarding');
+                        // Pass showLoading=true to trigger system loading animation
+                        login(token, userData, !hasSeenOnboarding, true);
                     }, remainingTime);
                 }
             } catch (err) {
@@ -226,6 +233,12 @@ const Login = () => {
 
     return (
         <div className={`login-container ${loading ? 'loading-state' : ''} ${showError ? 'error-state' : ''}`} ref={containerRef}>
+            {/* Winter Theme - Snow Effect */}
+            <SnowEffect />
+
+            {/* Winter Theme - Snowman */}
+            <Snowman position="right" />
+
             {/* Paper plane animation */}
             <div className={`paper-plane ${loading ? 'flying' : ''} ${showError ? 'crashed' : ''}`}>
                 <Send size={32} />

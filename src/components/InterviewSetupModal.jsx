@@ -32,10 +32,25 @@ const InterviewSetupModal = ({ isOpen, onClose, prefillData = null }) => {
             return;
         }
 
+        // Debug: Check if user is available
+        console.log('User object:', user);
+        console.log('User ID:', user?._id);
+
+        if (!user || !user._id) {
+            alert('User not authenticated. Please log in again.');
+            return;
+        }
+
         setLoading(true);
         try {
             if (formData.interviewType === 'dsa') {
                 // Create DSA interview session
+                console.log('Creating DSA interview with data:', {
+                    userId: user._id,
+                    topic: formData.topic,
+                    level: formData.level
+                });
+
                 const response = await fetch(`${API_BASE_URL}/dsa-interviews/create`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -47,27 +62,43 @@ const InterviewSetupModal = ({ isOpen, onClose, prefillData = null }) => {
                 });
 
                 const data = await response.json();
+                console.log('DSA interview response:', data);
 
                 if (data.success) {
                     navigate(`/dsa-interview/${data.data._id}`);
+                } else {
+                    alert(data.message || 'Failed to create DSA interview');
                 }
             } else {
                 // Create normal interview session
-                const response = await interviewAPI.createSession({
+                const payload = {
                     userId: user._id,
                     topic: formData.topic,
                     description: formData.description,
                     level: formData.level,
                     tone: 'Professional'
-                });
+                };
+
+                console.log('Creating normal interview with payload:', payload);
+
+                const response = await interviewAPI.createSession(payload);
+                console.log('Interview response:', response);
 
                 if (response.data) {
                     navigate(`/interview/${response.data._id}`);
+                } else {
+                    alert(response.message || 'Unexpected response format');
                 }
             }
         } catch (error) {
             console.error('Failed to create interview session:', error);
-            alert('Failed to create interview session. Please try again.');
+            console.error('Error details:', {
+                message: error.message,
+                response: error.response,
+                status: error.response?.status,
+                data: error.response?.data
+            });
+            alert(`Failed to create interview session: ${error.message || 'Please try again.'}`);
         } finally {
             setLoading(false);
         }

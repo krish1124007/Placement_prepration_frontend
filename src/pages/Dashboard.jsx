@@ -16,7 +16,11 @@ import {
     Mic,
     ClipboardList,
     Play,
-    AlertCircle
+    AlertCircle,
+    Download,
+    Target,
+    Edit,
+    Sparkles
 } from 'lucide-react';
 import './Dashboard.css';
 
@@ -27,6 +31,10 @@ const Dashboard = () => {
     const [modalPrefillData, setModalPrefillData] = useState(null);
     const [scheduledInterviews, setScheduledInterviews] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [showDownloadInfo, setShowDownloadInfo] = useState(false);
+    const [showFocusModal, setShowFocusModal] = useState(false);
+    const [focusLoading, setFocusLoading] = useState(false);
+    const [focusActivated, setFocusActivated] = useState(false);
 
     useEffect(() => {
         if (user?._id) {
@@ -103,6 +111,14 @@ const Dashboard = () => {
         navigate('/profile');
     };
 
+    const handleTurnOnFocus = () => {
+        setFocusLoading(true);
+        setTimeout(() => {
+            setFocusLoading(false);
+            setFocusActivated(true);
+        }, 2000);
+    };
+
     const todayInterviews = scheduledInterviews.filter(i => i.isToday);
     const tomorrowInterviews = scheduledInterviews.filter(i => i.isTomorrow);
 
@@ -134,6 +150,117 @@ const Dashboard = () => {
                     </button>
                 </div>
             </section>
+
+            {/* Ultra Focus Mode Section */}
+            <section className="ultra-focus-section">
+                <div className="ultra-focus-card">
+                    <div className="new-feature-banner">
+                        <Sparkles size={16} />
+                        <span>Super New Feature</span>
+                        <Sparkles size={16} />
+                    </div>
+                    <div className="ultra-focus-header">
+                        <Target size={32} />
+                        <h2>Turn on Ultra Focus Mode</h2>
+                    </div>
+                    <button
+                        className="ultra-focus-button"
+                        onClick={() => setShowFocusModal(true)}
+                    >
+                        <Target size={20} />
+                        Ultra Project Mode
+                    </button>
+                </div>
+            </section>
+
+            {/* Ultra Focus Modal */}
+            {showFocusModal && (
+                <div className="focus-modal-overlay">
+                    <div className="focus-modal-container">
+                        {!focusLoading && !focusActivated && (
+                            <>
+                                <div className="focus-modal-header">
+                                    <Target size={48} />
+                                    <h2>Ultra Focus Mode</h2>
+                                </div>
+                                <div className="focus-modal-body">
+                                    <p className="focus-warning">
+                                        ⚠️ After Ultra Focus Mode is ON
+                                    </p>
+                                    <div className="focus-restriction-list">
+                                        <p>You can't access to use any social media applications like:</p>
+                                        <ul>
+                                            <li>📸 Instagram</li>
+                                            <li>👻 Snapchat</li>
+                                            <li>📘 Facebook</li>
+                                            <li>🐦 Twitter</li>
+                                            <li>🎵 TikTok</li>
+                                            <li>And many more...</li>
+                                        </ul>
+                                        <p className="focus-goal-text">
+                                            Until you complete today's goals! If you do not complete today's goals,
+                                            you can't open your social media apps.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="focus-modal-footer">
+                                    <button
+                                        className="focus-edit-button"
+                                        onClick={() => setShowFocusModal(false)}
+                                    >
+                                        <Edit size={18} />
+                                        Edit
+                                    </button>
+                                    <button
+                                        className="focus-turn-on-button"
+                                        onClick={handleTurnOnFocus}
+                                    >
+                                        <Target size={18} />
+                                        Turn On
+                                    </button>
+                                </div>
+                            </>
+                        )}
+
+                        {focusLoading && (
+                            <div className="focus-loading-container">
+                                <div className="loading-spinner">
+                                    <Sparkles size={64} className="sparkle-icon" />
+                                </div>
+                                <h3>Activating Ultra Focus Mode...</h3>
+                                <div className="loading-dots">
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </div>
+                            </div>
+                        )}
+
+                        {focusActivated && (
+                            <div className="focus-success-container">
+                                <div className="success-icon-wrapper">
+                                    <Target size={64} className="success-icon" />
+                                    <Sparkles size={32} className="sparkle-accent" />
+                                </div>
+                                <h2 className="typing-text">Focus mode is now active! 🎯</h2>
+                                <p>You're all set to crush your goals today!</p>
+                                <button
+                                    className="focus-close-button"
+                                    onClick={() => {
+                                        setShowFocusModal(false);
+                                        setFocusActivated(false);
+                                    }}
+                                >
+                                    Get Started
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            {/* Download App Section */}
+
 
             {/* Scheduled Interviews Alert */}
             {(todayInterviews.length > 0 || tomorrowInterviews.length > 0) && (
@@ -237,6 +364,38 @@ const Dashboard = () => {
                         <p>Practice Questions</p>
                     </div>
                 </div>
+            </section>
+
+            <section className="download-app-section">
+                <div className="download-card">
+                    <div className="download-header">
+                        <Download size={32} />
+                        <h2>To unlock the full potential of our app, please download our application</h2>
+                    </div>
+                    <button
+                        className="download-button"
+                        onClick={() => setShowDownloadInfo(true)}
+                    >
+                        <Download size={20} />
+                        Download Now
+                    </button>
+                </div>
+
+                {showDownloadInfo && (
+                    <div className="download-info-container">
+                        <div className="download-info-content">
+                            <div className="info-icon">
+                                <Download size={40} />
+                            </div>
+                            <h3>Our Test version app is ready</h3>
+                            <p>Please download this app and unlock your full potential</p>
+                            <button className="download-final-button">
+                                <Download size={18} />
+                                Download Test Version
+                            </button>
+                        </div>
+                    </div>
+                )}
             </section>
 
             {/* Main Content Grid */}

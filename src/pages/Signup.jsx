@@ -4,6 +4,7 @@ import { useGoogleLogin } from '@react-oauth/google';
 import { authAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { Eye, EyeOff, ChevronDown, Briefcase, Send } from 'lucide-react';
+import { SnowEffect, Snowman } from '../components/SnowEffect';
 import './Signup.css';
 
 const Signup = () => {
@@ -106,7 +107,8 @@ const Signup = () => {
                 const remainingTime = Math.max(0, minAnimationDuration - elapsedTime);
 
                 setTimeout(() => {
-                    login(token, userData);
+                    // New signups always show onboarding
+                    login(token, userData, true);
                     navigate('/dashboard');
                 }, remainingTime);
             }
@@ -140,7 +142,8 @@ const Signup = () => {
                     const remainingTime = Math.max(0, minAnimationDuration - elapsedTime);
 
                     setTimeout(() => {
-                        login(token, userData);
+                        // New signups always show onboarding
+                        login(token, userData, true);
                         navigate('/dashboard');
                     }, remainingTime);
                 }
@@ -158,6 +161,12 @@ const Signup = () => {
 
     return (
         <div className={`signup-container ${loading ? 'loading-state' : ''} ${showError ? 'error-state' : ''}`} ref={containerRef}>
+            {/* Winter Theme - Snow Effect */}
+            <SnowEffect />
+
+            {/* Winter Theme - Snowman */}
+            <Snowman position="right" />
+
             {/* Paper plane animation */}
             <div className={`paper-plane ${loading ? 'flying' : ''} ${showError ? 'crashed' : ''}`}>
                 <Send size={32} />

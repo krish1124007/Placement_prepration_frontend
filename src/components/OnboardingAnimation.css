@@ -1,0 +1,487 @@
+/* Terminal Overlay */
+.terminal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #0a0e27;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    overflow: hidden;
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* Terminal Container */
+.terminal-container {
+    width: 90%;
+    max-width: 900px;
+    height: 600px;
+    background: #1e1e1e;
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5),
+        0 0 100px rgba(100, 255, 218, 0.1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: terminalSlideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    z-index: 10;
+}
+
+@keyframes terminalSlideIn {
+    from {
+        transform: scale(0.8) translateY(50px);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Terminal Header */
+.terminal-header {
+    background: #2d2d2d;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid #3d3d3d;
+    position: relative;
+}
+
+.terminal-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.terminal-button {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: block;
+}
+
+.terminal-button.close {
+    background: #ff5f56;
+}
+
+.terminal-button.minimize {
+    background: #ffbd2e;
+}
+
+.terminal-button.maximize {
+    background: #27c93f;
+}
+
+.terminal-title {
+    flex: 1;
+    text-align: center;
+    color: #8b8b8b;
+    font-size: 13px;
+    font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', 'Droid Sans Mono', monospace;
+}
+
+.terminal-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #3d3d3d;
+}
+
+.terminal-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #64ffda, #00d4ff);
+    transition: width 0.3s ease;
+    box-shadow: 0 0 10px rgba(100, 255, 218, 0.5);
+}
+
+/* Terminal Body */
+.terminal-body {
+    flex: 1;
+    background: #1e1e1e;
+    padding: 20px;
+    overflow-y: auto;
+    font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', 'Droid Sans Mono', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.terminal-content {
+    color: #d4d4d4;
+}
+
+/* Terminal Lines */
+.terminal-line {
+    margin-bottom: 4px;
+    animation: lineSlideIn 0.2s ease-out;
+}
+
+@keyframes lineSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.welcome-line {
+    margin-bottom: 12px;
+    color: #64ffda;
+}
+
+.terminal-prompt {
+    color: #64ffda;
+    font-weight: bold;
+}
+
+.terminal-separator {
+    color: #8b8b8b;
+}
+
+.terminal-path {
+    color: #569cd6;
+}
+
+.terminal-dollar {
+    color: #d4d4d4;
+    margin-left: 4px;
+}
+
+/* Command Line */
+.command-line {
+    color: #d4d4d4;
+}
+
+.command-prefix {
+    color: #64ffda;
+    font-weight: bold;
+}
+
+/* Info Line */
+.info-line {
+    color: #4ec9b0;
+}
+
+/* Tree Line */
+.tree-line {
+    color: #8b8b8b;
+}
+
+.tree-prefix {
+    color: #3d3d3d;
+}
+
+/* Progress Line */
+.progress-line {
+    color: #64ffda;
+    font-weight: bold;
+}
+
+/* Success Line */
+.success-line {
+    color: #89d185;
+}
+
+.success-icon {
+    color: #89d185;
+    font-weight: bold;
+}
+
+/* Ready Line */
+.ready-line {
+    color: #64ffda;
+    font-size: 16px;
+    font-weight: bold;
+    margin-top: 8px;
+    animation: glow 1.5s ease-in-out infinite;
+}
+
+@keyframes glow {
+
+    0%,
+    100% {
+        text-shadow: 0 0 10px rgba(100, 255, 218, 0.5);
+    }
+
+    50% {
+        text-shadow: 0 0 20px rgba(100, 255, 218, 0.8);
+    }
+}
+
+/* Welcome Line */
+.welcome-line .line-text {
+    color: #8b8b8b;
+    font-style: italic;
+}
+
+/* Blank Line */
+.blank-line {
+    height: 8px;
+}
+
+/* Terminal Cursor */
+.terminal-cursor {
+    display: inline-block;
+    width: 8px;
+    height: 16px;
+    background: #64ffda;
+    margin-left: 2px;
+    animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+
+    0%,
+    50% {
+        opacity: 1;
+    }
+
+    51%,
+    100% {
+        opacity: 0;
+    }
+}
+
+/* Loading Spinner */
+.loading-line {
+    color: #64ffda;
+}
+
+.spinner {
+    display: inline-block;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        content: '⠋';
+    }
+
+    10% {
+        content: '⠙';
+    }
+
+    20% {
+        content: '⠹';
+    }
+
+    30% {
+        content: '⠸';
+    }
+
+    40% {
+        content: '⠼';
+    }
+
+    50% {
+        content: '⠴';
+    }
+
+    60% {
+        content: '⠦';
+    }
+
+    70% {
+        content: '⠧';
+    }
+
+    80% {
+        content: '⠇';
+    }
+
+    90% {
+        content: '⠏';
+    }
+
+    100% {
+        content: '⠋';
+    }
+}
+
+/* Terminal Footer */
+.terminal-footer {
+    background: #252526;
+    padding: 8px 16px;
+    border-top: 1px solid #3d3d3d;
+}
+
+.terminal-stats {
+    display: flex;
+    gap: 24px;
+    font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', 'Droid Sans Mono', monospace;
+    font-size: 12px;
+}
+
+.stat {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.stat-label {
+    color: #8b8b8b;
+}
+
+.stat-value {
+    color: #64ffda;
+    font-weight: bold;
+}
+
+.status-installing {
+    color: #ffbd2e;
+}
+
+/* Matrix Background Effect */
+.matrix-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    opacity: 0.1;
+    z-index: 1;
+}
+
+.matrix-column {
+    position: absolute;
+    top: -100%;
+    width: 20px;
+    height: 100%;
+    animation: matrixFall linear infinite;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    color: #64ffda;
+    text-shadow: 0 0 5px rgba(100, 255, 218, 0.5);
+}
+
+@keyframes matrixFall {
+    0% {
+        transform: translateY(-100%);
+    }
+
+    100% {
+        transform: translateY(200vh);
+    }
+}
+
+.matrix-char {
+    display: block;
+    opacity: 0.8;
+    animation: matrixFade 2s linear infinite;
+}
+
+@keyframes matrixFade {
+
+    0%,
+    100% {
+        opacity: 0.2;
+    }
+
+    50% {
+        opacity: 0.8;
+    }
+}
+
+/* Scrollbar Styling */
+.terminal-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.terminal-body::-webkit-scrollbar-track {
+    background: #1e1e1e;
+}
+
+.terminal-body::-webkit-scrollbar-thumb {
+    background: #3d3d3d;
+    border-radius: 4px;
+}
+
+.terminal-body::-webkit-scrollbar-thumb:hover {
+    background: #4d4d4d;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .terminal-container {
+        width: 95%;
+        height: 500px;
+    }
+
+    .terminal-body {
+        font-size: 12px;
+        padding: 15px;
+    }
+
+    .terminal-stats {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .terminal-title {
+        font-size: 11px;
+    }
+}
+
+/* Additional Visual Effects */
+.terminal-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(180deg,
+            rgba(100, 255, 218, 0.03) 0%,
+            transparent 50%,
+            rgba(100, 255, 218, 0.03) 100%);
+    pointer-events: none;
+    animation: scanline 8s linear infinite;
+}
+
+@keyframes scanline {
+    0% {
+        transform: translateY(-100%);
+    }
+
+    100% {
+        transform: translateY(100%);
+    }
+}
+
+/* Typing Effect for Lines */
+.line-text {
+    display: inline-block;
+    animation: typing 0.1s steps(1);
+}
+
+@keyframes typing {
+    from {
+        width: 0;
+    }
+
+    to {
+        width: 100%;
+    }
+}

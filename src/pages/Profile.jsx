@@ -90,6 +90,7 @@ const Profile = () => {
     const fetchGithubRepos = async () => {
         try {
             setLoadingRepos(true);
+            console.log(user);  
             const response = await userAPI.getGithubRepos(user._id);
             if (response.data?.repos) {
                 setGithubRepos(response.data.repos.slice(0, 6)); // Show top 6 repos
@@ -127,8 +128,9 @@ const Profile = () => {
         setSuccess('');
 
         try {
-            const response = await userAPI.editUser(user._id, formData);
-
+            console.log(user);
+            const response = await userAPI.editUser(user._id || user._doc._id, formData);
+            
             if (response.status === 200 && response.data) {
                 updateUser(response.data);
                 setSuccess('Profile updated successfully!');

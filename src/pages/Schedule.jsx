@@ -7,17 +7,16 @@ import {
     ChevronRight,
     Plus,
     Clock,
-    Target,
     BookOpen,
     Code,
     Brain,
-    Loader2
+    Loader2,
+    CheckCircle2
 } from 'lucide-react';
 import './Schedule.css';
 
 const Schedule = () => {
     const [currentDate, setCurrentDate] = useState(new Date());
-    const [selectedDate, setSelectedDate] = useState(null);
     const [tasksByDate, setTasksByDate] = useState({});
     const [loading, setLoading] = useState(true);
 
@@ -49,19 +48,6 @@ const Schedule = () => {
     const getTasksForDate = (day) => {
         const dateStr = formatDateToYYYYMMDD(new Date(currentDate.getFullYear(), currentDate.getMonth(), day));
         return tasksByDate[dateStr] || [];
-    };
-
-    const getSelectedDateTasks = () => {
-        if (!selectedDate) return [];
-        return getTasksForDate(selectedDate);
-    };
-
-    const getTaskTypeColor = (type) => {
-        const colors = {
-            'Aptitude': 'bg-purple-500',
-            'DSA': 'bg-blue-500',
-        };
-        return colors[type] || 'bg-green-500';
     };
 
     const getTaskTypeIcon = (type) => {
@@ -100,7 +86,7 @@ const Schedule = () => {
         'July', 'August', 'September', 'October', 'November', 'December'
     ];
 
-    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
     const isToday = (day) => {
         const today = new Date();
@@ -111,14 +97,11 @@ const Schedule = () => {
         );
     };
 
-    const handleDateClick = (day) => {
-        setSelectedDate(day);
-    };
-
     return (
         <DashboardLayout>
-            <div className="schedule-container">
-                <div className="schedule-header">
+            <div className="schedule-page">
+                {/* Header */}
+                <div className="schedule-page-header">
                     <div>
                         <h1>Study Schedule</h1>
                         <p>Plan and track your daily preparation activities</p>
@@ -129,41 +112,42 @@ const Schedule = () => {
                     </button>
                 </div>
 
-                <div className="schedule-content">
-                    {/* Calendar Section */}
-                    <div className="calendar-section">
-                        <div className="calendar-card">
-                            <div className="calendar-header">
-                                <h2>
-                                    {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
-                                </h2>
-                                <div className="calendar-nav">
-                                    <button
-                                        className="nav-btn"
-                                        onClick={() => navigateMonth(-1)}
-                                    >
-                                        <ChevronLeft size={20} />
-                                    </button>
-                                    <button
-                                        className="nav-btn"
-                                        onClick={() => navigateMonth(1)}
-                                    >
-                                        <ChevronRight size={20} />
-                                    </button>
-                                </div>
-                            </div>
+                {/* Calendar Container */}
+                <div className="calendar-container">
+                    {/* Calendar Header */}
+                    <div className="calendar-header-section">
+                        <button className="month-nav-btn" onClick={() => navigateMonth(-1)}>
+                            <ChevronLeft size={24} />
+                        </button>
+                        <h2 className="calendar-title">
+                            {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
+                        </h2>
+                        <button className="month-nav-btn" onClick={() => navigateMonth(1)}>
+                            <ChevronRight size={24} />
+                        </button>
+                    </div>
 
-                            <div className="calendar-grid">
-                                {/* Day names */}
+                    {loading ? (
+                        <div className="calendar-loading">
+                            <Loader2 className="spinner" size={48} />
+                            <p>Loading schedule...</p>
+                        </div>
+                    ) : (
+                        <div className="calendar-wrapper">
+                            {/* Day Names Header */}
+                            <div className="calendar-days-header">
                                 {dayNames.map((day) => (
-                                    <div key={day} className="day-name">
+                                    <div key={day} className="day-header">
                                         {day}
                                     </div>
                                 ))}
+                            </div>
 
+                            {/* Calendar Grid */}
+                            <div className="calendar-main-grid">
                                 {/* Empty cells for days before month starts */}
                                 {Array.from({ length: startingDayOfWeek }).map((_, index) => (
-                                    <div key={`empty-${index}`} className="calendar-day empty" />
+                                    <div key={`empty-${index}`} className="calendar-cell empty-cell" />
                                 ))}
 
                                 {/* Days in month */}
@@ -175,97 +159,35 @@ const Schedule = () => {
                                     return (
                                         <div
                                             key={day}
-                                            className={`calendar-day ${isToday(day) ? 'today' : ''} ${selectedDate === day ? 'selected' : ''
-                                                } ${hasTasks ? 'has-tasks' : ''}`}
-                                            onClick={() => handleDateClick(day)}
+                                            className={`calendar-cell ${isToday(day) ? 'today' : ''} ${hasTasks ? 'has-tasks' : ''}`}
                                         >
-                                            <span className="day-number">{day}</span>
-                                            {hasTasks && (
-                                                <div className="day-indicators">
-                                                    {dayTasks.slice(0, 3).map((task, idx) => {
-                                                        const TaskIcon = getTaskTypeIcon(task.type);
-                                                        return (
-                                                            <div
-                                                                key={idx}
-                                                                className={`task-indicator ${getTaskTypeColor(task.type)}`}
-                                                                title={task.topic}
-                                                            />
-                                                        );
-                                                    })}
-                                                    {dayTasks.length > 3 && (
-                                                        <span className="more-indicator">+{dayTasks.length - 3}</span>
-                                                    )}
-                                                </div>
-                                            )}
+                                            <div className="cell-header">
+                                                <span className="cell-date">{day}</span>
+                                                {isToday(day) && <span className="today-badge">Today</span>}
+                                            </div>
+
+                                            <div className="cell-tasks">
+                                                {dayTasks.slice(0, 3).map((task, idx) => {
+                                                    const TaskIcon = getTaskTypeIcon(task.type);
+                                                    return (
+                                                        <div key={idx} className="task-badge">
+                                                            <TaskIcon size={14} className="task-badge-icon" />
+                                                            <span className="task-badge-text">{task.topic}</span>
+                                                        </div>
+                                                    );
+                                                })}
+                                                {dayTasks.length > 3 && (
+                                                    <div className="more-tasks-badge">
+                                                        +{dayTasks.length - 3} more
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                     );
                                 })}
                             </div>
                         </div>
-                    </div>
-
-                    {/* Sidebar for selected day details */}
-                    <div className="schedule-sidebar">
-                        {selectedDate ? (
-                            <>
-                                <div className="sidebar-header">
-                                    <div className="selected-date">
-                                        <CalendarIcon size={24} className="text-purple-400" />
-                                        <div>
-                                            <h3>
-                                                {monthNames[currentDate.getMonth()]} {selectedDate}
-                                            </h3>
-                                            <p className="text-slate-400">
-                                                {dayNames[new Date(currentDate.getFullYear(), currentDate.getMonth(), selectedDate).getDay()]}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="tasks-container">
-                                    <h4>Tasks for this day</h4>
-                                    {loading ? (
-                                        <div className="text-center py-8">
-                                            <Loader2 className="animate-spin h-8 w-8 mx-auto mb-4 text-purple-500" />
-                                            <p className="text-slate-400">Loading tasks...</p>
-                                        </div>
-                                    ) : getSelectedDateTasks().length > 0 ? (
-                                        <div className="tasks-list">
-                                            {getSelectedDateTasks().map((task, idx) => {
-                                                const TaskIcon = getTaskTypeIcon(task.type);
-                                                return (
-                                                    <div key={idx} className="task-item">
-                                                        <div className={`task-icon ${getTaskTypeColor(task.type)}`}>
-                                                            <TaskIcon size={18} />
-                                                        </div>
-                                                        <div className="task-details">
-                                                            <h5>{task.topic}</h5>
-                                                            <div className="task-meta">
-                                                                <span className="task-type">{task.type}</span>
-                                                                <span className="separator">•</span>
-                                                                <span className="task-plan">{task.planSubject}</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                    ) : (
-                                        <div className="empty-tasks">
-                                            <Target size={48} className="empty-icon" />
-                                            <p>No tasks scheduled</p>
-                                        </div>
-                                    )}
-                                </div>
-                            </>
-                        ) : (
-                            <div className="no-date-selected">
-                                <CalendarIcon size={64} className="empty-icon" />
-                                <h3>Select a date</h3>
-                                <p>Click on a date in the calendar to view or add tasks</p>
-                            </div>
-                        )}
-                    </div>
+                    )}
                 </div>
             </div>
         </DashboardLayout>
