@@ -30,7 +30,7 @@ const InterviewScorecard = () => {
 
     const fetchScorecard = async () => {
         try {
-            const response = await fetch(`http://localhost:8000/api/v1/interviews/scorecard/${sessionId}`);
+            const response = await fetch(`https://placement-prepration-backend.onrender.com/api/v1/interviews/scorecard/${sessionId}`);
             const data = await response.json();
 
             if (data.success || data.status === 200) {
