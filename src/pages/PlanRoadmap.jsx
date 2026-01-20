@@ -79,7 +79,7 @@ const PlanRoadmap = () => {
             if (isDSA) {
                 // Create DSA interview
                 console.log('Creating DSA interview...');
-                const response = await fetch('http://localhost:8000/api/v1/dsa-interviews/create', {
+                const response = await fetch('https://placement-prepration-backend.onrender.com/api/v1/dsa-interviews/create', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -102,7 +102,7 @@ const PlanRoadmap = () => {
             } else {
                 // Create normal interview
                 console.log('Creating normal interview...');
-                const response = await fetch('http://localhost:8000/api/v1/interviews/create', {
+                const response = await fetch('https://placement-prepration-backend.onrender.com/api/v1/interviews/create', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
