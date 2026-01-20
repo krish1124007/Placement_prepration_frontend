@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { userAPI } from '../services/api';
+import { motion, useMotionValue, useSpring } from 'framer-motion';
 import {
     User, Mail, Briefcase, Calendar, Github, Linkedin,
     Code, Award, Heart, BookOpen, ExternalLink, Edit2,
     Save, X, Sparkles, CheckCircle, AlertCircle, Loader,
-    Download, Globe
+    Download, Globe, Moon, Sun
 } from 'lucide-react';
 import './Profile.css';
 
@@ -62,6 +63,12 @@ const Profile = () => {
         interests: [],
     });
 
+    const [darkMode, setDarkMode] = useState(false);
+    const mouseX = useMotionValue(0);
+    const mouseY = useMotionValue(0);
+    const springX = useSpring(mouseX, { stiffness: 150, damping: 20 });
+    const springY = useSpring(mouseY, { stiffness: 150, damping: 20 });
+
     useEffect(() => {
         if (user) {
             setFormData({
@@ -87,10 +94,33 @@ const Profile = () => {
         }
     }, [user]);
 
+    useEffect(() => {
+        const savedTheme = localStorage.getItem('profileTheme');
+        if (savedTheme === 'dark') setDarkMode(true);
+    }, []);
+
+    useEffect(() => {
+        if (darkMode) {
+            document.documentElement.classList.add('dark-theme');
+        } else {
+            document.documentElement.classList.remove('dark-theme');
+        }
+        localStorage.setItem('profileTheme', darkMode ? 'dark' : 'light');
+    }, [darkMode]);
+
+    useEffect(() => {
+        const handleMouseMove = (e) => {
+            mouseX.set(e.clientX);
+            mouseY.set(e.clientY);
+        };
+        window.addEventListener('mousemove', handleMouseMove);
+        return () => window.removeEventListener('mousemove', handleMouseMove);
+    }, []);
+
     const fetchGithubRepos = async () => {
         try {
             setLoadingRepos(true);
-            console.log(user);  
+            console.log(user);
             const response = await userAPI.getGithubRepos(user._id);
             if (response.data?.repos) {
                 setGithubRepos(response.data.repos.slice(0, 6)); // Show top 6 repos
@@ -130,7 +160,7 @@ const Profile = () => {
         try {
             console.log(user);
             const response = await userAPI.editUser(user._id || user._doc._id, formData);
-            
+
             if (response.status === 200 && response.data) {
                 updateUser(response.data);
                 setSuccess('Profile updated successfully!');
@@ -215,9 +245,32 @@ const Profile = () => {
 
     return (
         <div className="profile-container">
+            {/* Animated Background */}
+            <div className="profile-animated-bg">
+                <div className="gradient-orb orb-1"></div>
+                <div className="gradient-orb orb-2"></div>
+            </div>
+
+            {/* Mouse Follower */}
+            <motion.div
+                className="mouse-follower"
+                style={{
+                    left: springX,
+                    top: springY,
+                }}
+            />
+
             <nav className="profile-nav">
                 <button onClick={() => navigate('/dashboard')} className="back-btn">
                     ← Back to Dashboard
+                </button>
+                <button
+                    onClick={() => setDarkMode(!darkMode)}
+                    className="theme-toggle-ultra"
+                    aria-label="Toggle theme"
+                    style={{ marginLeft: 'auto' }}
+                >
+                    {darkMode ? <Sun size={22} /> : <Moon size={22} />}
                 </button>
             </nav>
 

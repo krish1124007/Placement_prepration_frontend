@@ -1,37 +1,33 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { userAPI } from '../services/api';
 import {
-    User, Mail, Briefcase, Calendar, Github, Linkedin,
-    Code, Award, Heart, BookOpen, ExternalLink, Loader,
-    AlertCircle, ArrowLeft
+    Github, Linkedin, Code, ExternalLink, Loader, AlertCircle,
+    ArrowLeft, Star, GitFork, Moon, Sun, Sparkles
 } from 'lucide-react';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation, Pagination, Autoplay, EffectCards } from 'swiper/modules';
+import { motion, useMotionValue, useSpring } from 'framer-motion';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
+import 'swiper/css/effect-cards';
 import './Portfolio.css';
 
-// Helper function for language colors
+gsap.registerPlugin(ScrollTrigger);
+
 const getLanguageColor = (language) => {
     const colors = {
-        JavaScript: '#f1e05a',
-        TypeScript: '#3178c6',
-        Python: '#3572A5',
-        Java: '#b07219',
-        'C++': '#f34b7d',
-        C: '#555555',
-        'C#': '#178600',
-        Go: '#00ADD8',
-        Rust: '#dea584',
-        Ruby: '#701516',
-        PHP: '#4F5D95',
-        Swift: '#F05138',
-        Kotlin: '#A97BFF',
-        Dart: '#00B4AB',
-        HTML: '#e34c26',
-        CSS: '#563d7c',
-        Vue: '#41b883',
-        React: '#61dafb',
-        Shell: '#89e051',
+        JavaScript: '#f1e05a', TypeScript: '#3178c6', Python: '#3572A5',
+        Java: '#b07219', 'C++': '#f34b7d', C: '#555555', 'C#': '#178600',
+        Go: '#00ADD8', Rust: '#dea584', Ruby: '#701516', PHP: '#4F5D95',
+        Swift: '#F05138', Kotlin: '#A97BFF', Dart: '#00B4AB',
+        HTML: '#e34c26', CSS: '#563d7c', Vue: '#41b883', React: '#61dafb',
     };
-    return colors[language] || '#000000';
+    return colors[language] || '#64748b';
 };
 
 const Portfolio = () => {
@@ -41,52 +37,146 @@ const Portfolio = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [githubRepos, setGithubRepos] = useState([]);
-    const [loadingRepos, setLoadingRepos] = useState(false);
+    const [darkMode, setDarkMode] = useState(false);
+
+    // Mouse tracking
+    const mouseX = useMotionValue(0);
+    const mouseY = useMotionValue(0);
+    const springX = useSpring(mouseX, { stiffness: 150, damping: 20 });
+    const springY = useSpring(mouseY, { stiffness: 150, damping: 20 });
+
+    useEffect(() => {
+        // Check for saved theme preference
+        const savedTheme = localStorage.getItem('portfolioTheme');
+        setDarkMode(savedTheme === 'dark');
+    }, []);
+
+    useEffect(() => {
+        if (darkMode) {
+            document.documentElement.classList.add('dark-theme');
+        } else {
+            document.documentElement.classList.remove('dark-theme');
+        }
+        localStorage.setItem('portfolioTheme', darkMode ? 'dark' : 'light');
+    }, [darkMode]);
 
     useEffect(() => {
         fetchUserData();
     }, [userId]);
 
+    useEffect(() => {
+        const handleMouseMove = (e) => {
+            mouseX.set(e.clientX);
+            mouseY.set(e.clientY);
+        };
+        window.addEventListener('mousemove', handleMouseMove);
+        return () => window.removeEventListener('mousemove', handleMouseMove);
+    }, []);
+
+    useEffect(() => {
+        if (!loading && user) {
+            const ctx = gsap.context(() => {
+                gsap.from('.hero-content-ultra', {
+                    opacity: 0,
+                    y: 80,
+                    duration: 1.2,
+                    ease: 'power4.out',
+                });
+
+                gsap.from('.portfolio-section-ultra', {
+                    scrollTrigger: {
+                        trigger: '.portfolio-section-ultra',
+                        start: 'top 85%',
+                    },
+                    opacity: 0,
+                    y: 100,
+                    duration: 1,
+                    stagger: 0.3,
+                    ease: 'power3.out',
+                });
+
+                gsap.from('.skill-pill', {
+                    scrollTrigger: {
+                        trigger: '.skills-container-ultra',
+                        start: 'top 75%',
+                    },
+                    opacity: 0,
+                    scale: 0.5,
+                    rotation: 180,
+                    duration: 0.8,
+                    stagger: 0.05,
+                    ease: 'back.out(2)',
+                });
+            });
+            return () => ctx.revert();
+        }
+    }, [loading, user]);
+
     const fetchUserData = async () => {
         try {
             setLoading(true);
             setError('');
-            
-            // Try to fetch user by ID (public endpoint)
-            const response = await userAPI.getUserPublic(userId);
-            if (response.data) {
-                setUser(response.data);
-                
-                // Use cached GitHub repos if available (public endpoint doesn't require auth)
-                if (response.data.githubRepos && response.data.githubRepos.length > 0) {
-                    setGithubRepos(response.data.githubRepos.slice(0, 6));
+
+            if (userId) {
+                const response = await userAPI.getUserPublic(userId);
+                if (response.data) {
+                    setUser(response.data);
+                    if (response.data.githubRepos?.length) {
+                        setGithubRepos(response.data.githubRepos);
+                    }
+                }
+            } else {
+                const response = await userAPI.getProfile();
+                if (response.data) {
+                    setUser(response.data);
+                    if (response.data.githubRepos?.length) {
+                        setGithubRepos(response.data.githubRepos);
+                    }
                 }
             }
         } catch (err) {
-            console.error('Failed to fetch user:', err);
-            setError('Portfolio not found. The user may not exist or the link is invalid.');
+            setError('Portfolio not found.');
         } finally {
             setLoading(false);
         }
     };
 
+    const allProjects = [
+        ...(user?.projects || []).map((project, idx) => ({
+            id: `proj-${idx}`,
+            name: typeof project === 'string' ? project : project.name,
+            description: typeof project === 'object' ? project.description : '',
+            type: 'project',
+        })),
+        ...(githubRepos || []).map((repo) => ({
+            id: repo.id,
+            name: repo.name,
+            description: repo.description,
+            type: 'repo',
+            url: repo.html_url,
+            language: repo.language,
+            stars: repo.stargazers_count || 0,
+            forks: repo.forks_count || 0,
+        }))
+    ];
+
     if (loading) {
         return (
-            <div className="portfolio-loading">
-                <Loader className="spinner" size={48} />
-                <p>Loading portfolio...</p>
+            <div className="portfolio-loading-ultra">
+                <Loader className="spinner-ultra" size={56} />
+                <p>Loading amazing portfolio...</p>
             </div>
         );
     }
 
     if (error || !user) {
         return (
-            <div className="portfolio-error">
-                <AlertCircle size={48} />
+            <div className="portfolio-error-ultra">
+                <AlertCircle size={64} />
                 <h2>Portfolio Not Found</h2>
-                <p>{error || 'The portfolio you are looking for does not exist.'}</p>
-                <button onClick={() => navigate('/dashboard')} className="back-home-btn">
-                    <ArrowLeft size={18} />
+                <p>{error}</p>
+                <button onClick={() => navigate('/dashboard')} className="btn-ultra-primary">
+                    <ArrowLeft size={20} />
                     Back to Dashboard
                 </button>
             </div>
@@ -94,354 +184,291 @@ const Portfolio = () => {
     }
 
     return (
-        <div className="portfolio-container">
-            {/* Navigation */}
-            <nav className="portfolio-nav">
-                <button onClick={() => navigate('/dashboard')} className="back-btn">
-                    <ArrowLeft size={18} />
-                    Back to Dashboard
-                </button>
-            </nav>
+        <div className="portfolio-ultra">
+            {/* Animated Background */}
+            <div className="animated-bg">
+                <div className="gradient-orb orb-1"></div>
+                <div className="gradient-orb orb-2"></div>
+                <div className="gradient-orb orb-3"></div>
+            </div>
 
-            <div className="portfolio-content">
-                {/* Hero Section */}
-                <div className="portfolio-hero">
-                    <div className="portfolio-hero-bg"></div>
-                    <div className="portfolio-hero-content">
-                        <div className="portfolio-avatar-container">
-                            <div className="portfolio-avatar-large">
-                                {user.image ? (
-                                    <img src={user.image} alt={user.name} />
-                                ) : (
-                                    <div className="avatar-placeholder-large">
-                                        {user.name?.charAt(0).toUpperCase()}
-                                    </div>
-                                )}
+            {/* Mouse Follower */}
+            <motion.div
+                className="mouse-follower"
+                style={{
+                    left: springX,
+                    top: springY,
+                }}
+            />
+
+            {/* Navigation */}
+            <motion.nav
+                className="nav-ultra"
+                initial={{ y: -100 }}
+                animate={{ y: 0 }}
+                transition={{ duration: 0.6, ease: 'easeOut' }}
+            >
+                <button onClick={() => navigate('/dashboard')} className="nav-btn-ultra">
+                    <ArrowLeft size={20} />
+                    <span>Dashboard</span>
+                </button>
+                <button
+                    onClick={() => setDarkMode(!darkMode)}
+                    className="theme-toggle-ultra"
+                    aria-label="Toggle theme"
+                >
+                    {darkMode ? <Sun size={22} /> : <Moon size={22} />}
+                </button>
+            </motion.nav>
+
+            {/* Hero Section */}
+            <section className="hero-ultra">
+                <div className="hero-content-ultra">
+                    <motion.div
+                        className="avatar-ultra"
+                        initial={{ scale: 0, rotate: -180 }}
+                        animate={{ scale: 1, rotate: 0 }}
+                        transition={{ duration: 1, type: 'spring', bounce: 0.5 }}
+                    >
+                        {user.image ? (
+                            <img src={user.image} alt={user.name} />
+                        ) : (
+                            <div className="avatar-placeholder-ultra">
+                                {user.name?.charAt(0).toUpperCase()}
                             </div>
+                        )}
+                        <div className="avatar-glow"></div>
+                    </motion.div>
+
+                    <motion.h1
+                        className="hero-title"
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3, duration: 0.8 }}
+                    >
+                        {user.name}
+                    </motion.h1>
+
+                    {user.role && (
+                        <motion.p
+                            className="hero-subtitle"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.5 }}
+                        >
+                            {user.role}
+                        </motion.p>
+                    )}
+
+                    <motion.div
+                        className="hero-meta-ultra"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.7 }}
+                    >
+                        {user.email && <span>✉️ {user.email}</span>}
+                        {user.branch && <span>📚 {user.branch}</span>}
+                        {user.passing_year && <span>🎓 Class of {user.passing_year}</span>}
+                    </motion.div>
+                </div>
+            </section>
+
+            {/* Main Content */}
+            <div className="content-ultra">
+                {/* About */}
+                {user.about && (
+                    <section className="portfolio-section-ultra about-ultra">
+                        <motion.div
+                            className="glass-card"
+                            whileHover={{ scale: 1.02 }}
+                            transition={{ duration: 0.3 }}
+                        >
+                            <h2 className="section-title-ultra">
+                                <Sparkles size={28} />
+                                About Me
+                            </h2>
+                            <p className="about-text-ultra">{user.about}</p>
+                        </motion.div>
+                    </section>
+                )}
+
+                {/* Skills */}
+                {user.skills?.length > 0 && (
+                    <section className="portfolio-section-ultra skills-ultra">
+                        <h2 className="section-title-ultra">
+                            <Code size={28} />
+                            Technical Arsenal
+                        </h2>
+                        <div className="skills-container-ultra">
+                            {user.skills.map((skill, idx) => (
+                                <motion.span
+                                    key={idx}
+                                    className="skill-pill"
+                                    whileHover={{ scale: 1.1, rotate: 5 }}
+                                    whileTap={{ scale: 0.95 }}
+                                >
+                                    {skill}
+                                </motion.span>
+                            ))}
                         </div>
-                        <div className="portfolio-hero-info">
-                            <h1 className="portfolio-name">{user.name}</h1>
-                            <div className="portfolio-meta">
-                                <span className="portfolio-email">
-                                    <Mail size={16} />
-                                    {user.email}
-                                </span>
-                                {user.role && (
-                                    <span className="portfolio-role-badge">
-                                        {user.role}
-                                    </span>
-                                )}
-                            </div>
-                            {user.branch && (
-                                <div className="portfolio-quick-info">
-                                    <span><Briefcase size={14} /> {user.branch}</span>
-                                    {user.sem && <span>Semester {user.sem}</span>}
-                                    {user.passing_year && (
-                                        <span><Calendar size={14} /> {user.passing_year}</span>
-                                    )}
-                                </div>
+                    </section>
+                )}
+
+                {/* Projects Carousel */}
+                {allProjects.length > 0 && (
+                    <section className="portfolio-section-ultra projects-ultra">
+                        <h2 className="section-title-ultra">
+                            <Star size={28} />
+                            Featured Projects
+                        </h2>
+                        <div className="projects-swiper-ultra">
+                            <Swiper
+                                modules={[Navigation, Pagination, Autoplay]}
+                                spaceBetween={24}
+                                slidesPerView={1}
+                                breakpoints={{
+                                    640: { slidesPerView: 2 },
+                                    1024: { slidesPerView: 3 },
+                                }}
+                                pagination={{ clickable: true }}
+                                navigation
+                                autoplay={{ delay: 4000, pauseOnMouseEnter: true }}
+                                loop={allProjects.length > 3}
+                            >
+                                {allProjects.map((project) => (
+                                    <SwiperSlide key={project.id}>
+                                        <motion.div
+                                            className="project-card-ultra"
+                                            whileHover={{ y: -10 }}
+                                            transition={{ duration: 0.3 }}
+                                        >
+                                            {project.type === 'repo' ? (
+                                                <a href={project.url} target="_blank" rel="noopener noreferrer" className="project-link">
+                                                    <div className="project-icon-ultra">
+                                                        <Github size={32} />
+                                                    </div>
+                                                    <h3 className="project-name-ultra">{project.name}</h3>
+                                                    {project.description && (
+                                                        <p className="project-desc-ultra">{project.description}</p>
+                                                    )}
+                                                    <div className="project-meta-ultra">
+                                                        {project.language && (
+                                                            <span className="lang-badge">
+                                                                <span
+                                                                    className="lang-dot-ultra"
+                                                                    style={{ background: getLanguageColor(project.language) }}
+                                                                />
+                                                                {project.language}
+                                                            </span>
+                                                        )}
+                                                        <span className="stat-badge">
+                                                            <Star size={14} /> {project.stars}
+                                                        </span>
+                                                        <span className="stat-badge">
+                                                            <GitFork size={14} /> {project.forks}
+                                                        </span>
+                                                    </div>
+                                                </a>
+                                            ) : (
+                                                <div className="project-link">
+                                                    <div className="project-icon-ultra">💼</div>
+                                                    <h3 className="project-name-ultra">{project.name}</h3>
+                                                    {project.description && (
+                                                        <p className="project-desc-ultra">{project.description}</p>
+                                                    )}
+                                                    <div className="personal-badge">Personal Project</div>
+                                                </div>
+                                            )}
+                                        </motion.div>
+                                    </SwiperSlide>
+                                ))}
+                            </Swiper>
+                        </div>
+                    </section>
+                )}
+
+                {/* Achievements */}
+                {user.achievements?.length > 0 && (
+                    <section className="portfolio-section-ultra achievements-ultra">
+                        <h2 className="section-title-ultra">🏆 Achievements</h2>
+                        <div className="achievements-grid-ultra">
+                            {user.achievements.map((achievement, idx) => (
+                                <motion.div
+                                    key={idx}
+                                    className="achievement-card-ultra"
+                                    initial={{ opacity: 0, x: -50 }}
+                                    whileInView={{ opacity: 1, x: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ delay: idx * 0.1 }}
+                                    whileHover={{ scale: 1.03, x: 10 }}
+                                >
+                                    <span className="achievement-icon">🎖️</span>
+                                    <p>{achievement}</p>
+                                </motion.div>
+                            ))}
+                        </div>
+                    </section>
+                )}
+
+                {/* Contact */}
+                <section className="portfolio-section-ultra contact-ultra">
+                    <motion.div
+                        className="glass-card"
+                        whileHover={{ scale: 1.02 }}
+                    >
+                        <h2 className="section-title-ultra">📫 Let's Connect</h2>
+                        <div className="social-grid-ultra">
+                            {user.github && (
+                                <motion.a
+                                    href={user.github}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="social-btn-ultra github-btn"
+                                    whileHover={{ scale: 1.1, rotate: 5 }}
+                                    whileTap={{ scale: 0.95 }}
+                                >
+                                    <Github size={28} />
+                                    <span>GitHub</span>
+                                    <ExternalLink size={16} className="external-icon-ultra" />
+                                </motion.a>
+                            )}
+                            {user.linkedin && (
+                                <motion.a
+                                    href={user.linkedin}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="social-btn-ultra linkedin-btn"
+                                    whileHover={{ scale: 1.1, rotate: -5 }}
+                                    whileTap={{ scale: 0.95 }}
+                                >
+                                    <Linkedin size={28} />
+                                    <span>LinkedIn</span>
+                                    <ExternalLink size={16} className="external-icon-ultra" />
+                                </motion.a>
+                            )}
+                            {user.leetcode && (
+                                <motion.a
+                                    href={user.leetcode}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="social-btn-ultra leetcode-btn"
+                                    whileHover={{ scale: 1.1, rotate: 5 }}
+                                    whileTap={{ scale: 0.95 }}
+                                >
+                                    <Code size={28} />
+                                    <span>LeetCode</span>
+                                    <ExternalLink size={16} className="external-icon-ultra" />
+                                </motion.a>
                             )}
                         </div>
-                    </div>
-                </div>
-
-                {/* Main Content Grid */}
-                <div className="portfolio-grid">
-                    {/* Left Column */}
-                    <div className="portfolio-left">
-                        {/* About Section */}
-                        {user.about && (
-                            <div className="info-card">
-                                <h3 className="card-title">
-                                    <BookOpen size={20} />
-                                    About
-                                </h3>
-                                <p className="about-text">{user.about}</p>
-                            </div>
-                        )}
-
-                        {/* Skills */}
-                        {user.skills && user.skills.length > 0 && (
-                            <div className="info-card">
-                                <h3 className="card-title">
-                                    <Code size={20} />
-                                    Skills
-                                </h3>
-                                <div className="skills-grid">
-                                    {user.skills.map((skill, index) => (
-                                        <span key={index} className="skill-badge">
-                                            {skill}
-                                        </span>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Achievements */}
-                        {user.achievements && user.achievements.length > 0 && (
-                            <div className="info-card">
-                                <h3 className="card-title">
-                                    <Award size={20} />
-                                    Achievements
-                                </h3>
-                                <ul className="achievement-list">
-                                    {user.achievements.map((achievement, index) => (
-                                        <li key={index} className="achievement-item">
-                                            <Award size={16} />
-                                            <span>{achievement}</span>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )}
-
-                        {/* Interests */}
-                        {user.interests && user.interests.length > 0 && (
-                            <div className="info-card">
-                                <h3 className="card-title">
-                                    <Heart size={20} />
-                                    Interests
-                                </h3>
-                                <div className="interests-grid">
-                                    {user.interests.map((interest, index) => (
-                                        <span key={index} className="interest-tag">
-                                            {interest}
-                                        </span>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Right Column */}
-                    <div className="portfolio-right">
-                        {/* Social Links */}
-                        <div className="info-card">
-                            <h3 className="card-title">Connect</h3>
-                            <div className="social-links">
-                                {user.github && (
-                                    <a href={user.github} target="_blank" rel="noopener noreferrer" className="social-link github-link">
-                                        <Github size={20} />
-                                        <span>GitHub</span>
-                                        <ExternalLink size={14} />
-                                    </a>
-                                )}
-                                {user.linkedin && (
-                                    <a href={user.linkedin} target="_blank" rel="noopener noreferrer" className="social-link linkedin-link">
-                                        <Linkedin size={20} />
-                                        <span>LinkedIn</span>
-                                        <ExternalLink size={14} />
-                                    </a>
-                                )}
-                                {user.leetcode && (
-                                    <a href={user.leetcode} target="_blank" rel="noopener noreferrer" className="social-link leetcode-link">
-                                        <Code size={20} />
-                                        <span>LeetCode</span>
-                                        <ExternalLink size={14} />
-                                    </a>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Projects */}
-                        {user.projects && user.projects.length > 0 && (
-                            <div className="info-card">
-                                <h3 className="card-title">
-                                    <Briefcase size={20} />
-                                    Projects
-                                </h3>
-                                <div className="projects-list">
-                                    {user.projects.map((project, index) => (
-                                        <div key={index} className="project-item">
-                                            <div className="project-icon">💼</div>
-                                            <span>{project}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* GitHub Repos */}
-                        {user.githubId && (
-                            <div className="info-card github-section">
-                                <div className="github-header">
-                                    <div className="github-header-left">
-                                        <div className="github-title-row">
-                                            <Github size={24} />
-                                            <div>
-                                                <h3 className="github-title">GitHub</h3>
-                                                {user.githubUsername && (
-                                                    <a
-                                                        href={`https://github.com/${user.githubUsername}`}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="github-username"
-                                                    >
-                                                        @{user.githubUsername}
-                                                    </a>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* GitHub Stats */}
-                                <div className="github-stats">
-                                    <div className="stat-item">
-                                        <div className="stat-value">{user.githubRepos?.length || githubRepos.length || 0}</div>
-                                        <div className="stat-label">Repositories</div>
-                                    </div>
-                                    <div className="stat-item">
-                                        <div className="stat-value">
-                                            {(githubRepos.length > 0 ? githubRepos : (user.githubRepos || [])).reduce((acc, repo) => acc + (repo.stargazers_count || 0), 0)}
-                                        </div>
-                                        <div className="stat-label">Total Stars</div>
-                                    </div>
-                                    <div className="stat-item">
-                                        <div className="stat-value">
-                                            {(githubRepos.length > 0 ? githubRepos : (user.githubRepos || [])).reduce((acc, repo) => acc + (repo.forks_count || 0), 0)}
-                                        </div>
-                                        <div className="stat-label">Total Forks</div>
-                                    </div>
-                                </div>
-
-                                <div className="repos-section">
-                                    <div className="repos-header">
-                                        <h4 className="repos-subtitle">Top Repositories</h4>
-                                        {user.githubUsername && (
-                                            <a
-                                                href={`https://github.com/${user.githubUsername}?tab=repositories`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="view-all-link"
-                                            >
-                                                View All
-                                                <ExternalLink size={12} />
-                                            </a>
-                                        )}
-                                    </div>
-
-                                    {githubRepos.length > 0 ? (
-                                        <div className="repos-grid">
-                                            {githubRepos.map((repo, index) => (
-                                                <a
-                                                    key={index}
-                                                    href={repo.html_url}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="repo-card"
-                                                >
-                                                    <div className="repo-header">
-                                                        <span className="repo-name">
-                                                            <BookOpen size={16} />
-                                                            {repo.name}
-                                                        </span>
-                                                        {repo.private && (
-                                                            <span className="repo-private-badge">Private</span>
-                                                        )}
-                                                    </div>
-                                                    {repo.description && (
-                                                        <p className="repo-description">{repo.description}</p>
-                                                    )}
-                                                    <div className="repo-stats">
-                                                        {repo.language && (
-                                                            <span className="repo-stat">
-                                                                <span className="language-dot" style={{
-                                                                    background: getLanguageColor(repo.language)
-                                                                }}></span>
-                                                                {repo.language}
-                                                            </span>
-                                                        )}
-                                                        <span className="repo-stat">
-                                                            <span className="stat-icon">⭐</span>
-                                                            {repo.stargazers_count}
-                                                        </span>
-                                                        <span className="repo-stat">
-                                                            <span className="stat-icon">🍴</span>
-                                                            {repo.forks_count || 0}
-                                                        </span>
-                                                    </div>
-                                                    <div className="repo-updated">
-                                                        Updated {new Date(repo.updated_at).toLocaleDateString('en-US', {
-                                                            month: 'short',
-                                                            day: 'numeric',
-                                                            year: 'numeric'
-                                                        })}
-                                                    </div>
-                                                </a>
-                                            ))}
-                                        </div>
-                                    ) : user.githubRepos && user.githubRepos.length > 0 ? (
-                                        <div className="repos-grid">
-                                            {user.githubRepos.slice(0, 6).map((repo, index) => (
-                                                <a
-                                                    key={index}
-                                                    href={repo.html_url || `https://github.com/${user.githubUsername}/${repo.name}`}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="repo-card"
-                                                >
-                                                    <div className="repo-header">
-                                                        <span className="repo-name">
-                                                            <BookOpen size={16} />
-                                                            {repo.name}
-                                                        </span>
-                                                        {repo.private && (
-                                                            <span className="repo-private-badge">Private</span>
-                                                        )}
-                                                    </div>
-                                                    {repo.description && (
-                                                        <p className="repo-description">{repo.description}</p>
-                                                    )}
-                                                    <div className="repo-stats">
-                                                        {repo.language && (
-                                                            <span className="repo-stat">
-                                                                <span className="language-dot" style={{
-                                                                    background: getLanguageColor(repo.language)
-                                                                }}></span>
-                                                                {repo.language}
-                                                            </span>
-                                                        )}
-                                                        {repo.stargazers_count !== undefined && (
-                                                            <span className="repo-stat">
-                                                                <span className="stat-icon">⭐</span>
-                                                                {repo.stargazers_count}
-                                                            </span>
-                                                        )}
-                                                        {repo.forks_count !== undefined && (
-                                                            <span className="repo-stat">
-                                                                <span className="stat-icon">🍴</span>
-                                                                {repo.forks_count}
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                    {repo.updated_at && (
-                                                        <div className="repo-updated">
-                                                            Updated {new Date(repo.updated_at).toLocaleDateString('en-US', {
-                                                                month: 'short',
-                                                                day: 'numeric',
-                                                                year: 'numeric'
-                                                            })}
-                                                        </div>
-                                                    )}
-                                                </a>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <div className="empty-state-box">
-                                            <BookOpen size={32} />
-                                            <p className="empty-state-title">No repositories yet</p>
-                                            <p className="empty-state-text">
-                                                Start building amazing projects and they'll show up here!
-                                            </p>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </div>
+                    </motion.div>
+                </section>
             </div>
+
+            {/* Footer */}
+            <footer className="footer-ultra">
+                <p>© {new Date().getFullYear()} {user.name}. Crafted with ❤️</p>
+            </footer>
         </div>
     );
 };

@@ -185,15 +185,25 @@ const Interview = () => {
     };
 
     // Auto-restart listening when AI finishes speaking/thinking
+    // BUT NEVER restart while AI is speaking
     useEffect(() => {
+        // STRICT CHECK: Only allow mic when AI is completely done
         if (status === 'ACTIVE' && !isSpeaking && !isThinking && !isListening) {
             // Small delay to ensure clean state transition
             const timer = setTimeout(() => {
+                // Double check isSpeaking hasn't changed
                 if (status === 'ACTIVE' && !isSpeaking && !isThinking && !isListening) {
                     startListening();
                 }
             }, 500);
             return () => clearTimeout(timer);
+        }
+
+        // If AI starts speaking, FORCE stop listening
+        if (isSpeaking && (isListening || speechRecognition.isListening)) {
+            stopListening();
+            speechRecognition.stop();
+            setIsListening(false);
         }
     }, [isSpeaking, isThinking, status, isListening]);
 
@@ -236,16 +246,25 @@ const Interview = () => {
     };
 
     const speakText = async (text) => {
+        // STRICTLY stop listening and prevent mic from turning on
         setIsSpeaking(true);
-        stopListening(); // Enforce stop immediately
+        stopListening();
+        speechRecognition.stop(); // Double ensure
 
         try {
             await speechSynthesis.speak(text, {
                 rate: 0.95,
                 pitch: 1.05,
                 volume: 1.0,
-                onStart: () => stopListening(),
-                onEnd: () => setIsSpeaking(false)
+                onStart: () => {
+                    // Force stop mic multiple times during AI speech
+                    stopListening();
+                    speechRecognition.stop();
+                    setIsListening(false);
+                },
+                onEnd: () => {
+                    setIsSpeaking(false);
+                }
             });
         } catch (error) {
             console.error('Speech error:', error);
@@ -254,14 +273,39 @@ const Interview = () => {
     };
 
     const endInterview = async () => {
+        // IMMEDIATELY stop all audio/speech activities
         if (timerRef.current) clearInterval(timerRef.current);
+
+        // Force stop mic
         stopListening();
+        speechRecognition.stop();
+        setIsListening(false);
+
+        // DESTROY AI voice completely - stop any ongoing speech
         speechSynthesis.cancel();
+        window.speechSynthesis?.cancel(); // Also cancel browser native
+        setIsSpeaking(false);
+        setIsThinking(false);
 
         // Immediate UI update to prevent "not working" feeling
         setStatus('ENDED');
 
         try {
+            // Save all transcriptions including current one before ending
+            const finalTranscriptions = [...transcriptions];
+
+            // Add current user transcript if exists
+            if (currentTranscript && currentTranscript.trim()) {
+                finalTranscriptions.push({
+                    speaker: 'User',
+                    text: currentTranscript.trim(),
+                    timestamp: Date.now()
+                });
+            }
+
+            // Save final transcriptions to backend
+            console.log('Saving transcriptions:', finalTranscriptions.length);
+
             await interviewAPI.endInterview(sessionId, '');
 
             // Check for pending task completion
