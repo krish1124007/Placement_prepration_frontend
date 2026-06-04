@@ -1,161 +1,23 @@
-/* ========== PROFILE PAGE - ULTRA MODE ========== */
-
-:root {
-    --bg-primary: #ffffff;
-    --bg-secondary: #f8fafc;
-    --text-primary: #0f172a;
-    --text-secondary: #64748b;
-    --accent: #6366f1;
-    --accent-light: #818cf8;
-    --glass-bg: rgba(255, 255, 255, 0.7);
-    --glass-border: rgba(255, 255, 255, 0.3);
-    --shadow: rgba(0, 0, 0, 0.1);
-    --card-bg: #ffffff;
-}
-
-.dark-theme {
-    --bg-primary: #0f172a;
-    --bg-secondary: #1e293b;
-    --text-primary: #f1f5f9;
-    --text-secondary: #cbd5e1;
-    --accent: #818cf8;
-    --accent-light: #a5b4fc;
-    --glass-bg: rgba(30, 41, 59, 0.7);
-    --glass-border: rgba(255, 255, 255, 0.1);
-    --shadow: rgba(0, 0, 0, 0.5);
-    --card-bg: #1e293b;
-}
+/* ========== PROFILE PAGE - INTEGRATED DASHBOARD THEME ========== */
 
 .profile-container {
-    min-height: 100vh;
-    background: var(--bg-primary);
+    --bg-primary: transparent;
+    --bg-secondary: rgba(255, 255, 255, 0.05);
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --accent: #10b981;
+    --accent-light: #34d399;
+    --glass-bg: rgba(15, 21, 32, 0.6);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --shadow: rgba(0, 0, 0, 0.25);
+    --card-bg: #151c2c;
+    
     color: var(--text-primary);
     position: relative;
     transition: all 0.3s ease;
 }
 
-/* Animated Background (same as portfolio) */
-.profile-animated-bg {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 0;
-    overflow: hidden;
-    pointer-events: none;
-}
 
-.profile-animated-bg .gradient-orb {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.6;
-    animation: float 20s ease-in-out infinite;
-}
-
-.profile-animated-bg .orb-1 {
-    width: 500px;
-    height: 500px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    top: -10%;
-    right: -10%;
-}
-
-.profile-animated-bg .orb-2 {
-    width: 400px;
-    height: 400px;
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-    bottom: -10%;
-    left: -10%;
-    animation-delay: 7s;
-}
-
-@keyframes float {
-
-    0%,
-    100% {
-        transform: translate(0, 0) scale(1);
-    }
-
-    33% {
-        transform: translate(30px, -50px) scale(1.1);
-    }
-
-    66% {
-        transform: translate(-20px, 20px) scale(0.9);
-    }
-}
-
-/* Mouse Follower */
-.mouse-follower {
-    position: fixed;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: var(--accent);
-    opacity: 0.3;
-    pointer-events: none;
-    z-index: 9999;
-    transform: translate(-50%, -50%);
-    box-shadow: 0 0 30px var(--accent);
-}
-
-/* Navigation */
-.profile-nav {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 1000;
-    background: var(--glass-bg);
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--glass-border);
-    padding: 1.5rem 3rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.theme-toggle-ultra {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background: var(--glass-bg);
-    backdrop-filter: blur(10px);
-    border: 2px solid var(--glass-border);
-    color: var(--text-primary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.theme-toggle-ultra:hover {
-    background: var(--accent);
-    color: white;
-    transform: rotate(180deg);
-}
-
-.back-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.5rem;
-    background: var(--accent);
-    color: white;
-    border: none;
-    border-radius: 50px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.back-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
-}
 
 /* Content */
 .profile-content {
@@ -163,7 +25,7 @@
     z-index: 1;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 7rem 2rem 2rem;
+    padding: 20px;
 }
 
 /* Hero Section - NO BACKGROUND POSTER */
@@ -185,7 +47,7 @@
 
 .profile-hero-content {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 2rem;
 }
 
@@ -254,16 +116,19 @@
 
 .profile-hero-info {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 140px;
 }
 
 .profile-name {
     font-size: 2.5rem;
-    font-weight: 900;
-    background: linear-gradient(135deg, var(--accent), var(--accent-light));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 0.75rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    text-transform: capitalize;
+    margin-bottom: 0.5rem;
+    line-height: 1.2;
 }
 
 .profile-meta {
@@ -306,9 +171,9 @@
 
 .profile-actions {
     display: flex;
-    gap: 1rem;
-    margin-top: 1.5rem;
-    flex-wrap: wrap;
+    flex-direction: column;
+    gap: 0.75rem;
+    min-width: 200px;
 }
 
 .edit-profile-btn,
@@ -316,13 +181,16 @@
 .open-portfolio-btn {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 0.5rem;
-    padding: 0.875rem 1.5rem;
-    border-radius: 12px;
+    padding: 0.75rem 1.25rem;
+    border-radius: 8px;
     font-weight: 600;
+    font-size: 0.95rem;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     border: none;
+    width: 100%;
 }
 
 .edit-profile-btn {
@@ -332,22 +200,20 @@
 
 .edit-profile-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
 }
 
 .download-resume-btn,
 .open-portfolio-btn {
-    background: var(--glass-bg);
+    background: transparent;
     color: var(--text-primary);
-    border: 2px solid var(--glass-border);
+    border: 1px solid var(--glass-border);
 }
 
 .download-resume-btn:hover,
 .open-portfolio-btn:hover {
-    background: var(--accent);
-    color: white;
-    border-color: var(--accent);
-    transform: translateY(-2px);
+    background: var(--bg-secondary);
+    border-color: var(--text-secondary);
 }
 
 /* Alerts */

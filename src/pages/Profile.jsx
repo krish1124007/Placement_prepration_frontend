@@ -7,8 +7,9 @@ import {
     User, Mail, Briefcase, Calendar, Github, Linkedin,
     Code, Award, Heart, BookOpen, ExternalLink, Edit2,
     Save, X, Sparkles, CheckCircle, AlertCircle, Loader,
-    Download, Globe, Moon, Sun
+    Download, Globe
 } from 'lucide-react';
+import DashboardLayout from '../components/DashboardLayout';
 import './Profile.css';
 
 // Helper function for language colors
@@ -63,11 +64,7 @@ const Profile = () => {
         interests: [],
     });
 
-    const [darkMode, setDarkMode] = useState(false);
-    const mouseX = useMotionValue(0);
-    const mouseY = useMotionValue(0);
-    const springX = useSpring(mouseX, { stiffness: 150, damping: 20 });
-    const springY = useSpring(mouseY, { stiffness: 150, damping: 20 });
+    const [darkMode, setDarkMode] = useState(true);
 
     useEffect(() => {
         if (user) {
@@ -109,12 +106,7 @@ const Profile = () => {
     }, [darkMode]);
 
     useEffect(() => {
-        const handleMouseMove = (e) => {
-            mouseX.set(e.clientX);
-            mouseY.set(e.clientY);
-        };
-        window.addEventListener('mousemove', handleMouseMove);
-        return () => window.removeEventListener('mousemove', handleMouseMove);
+        // Theme is now managed by Dashboard layout
     }, []);
 
     const fetchGithubRepos = async () => {
@@ -244,37 +236,9 @@ const Profile = () => {
     };
 
     return (
-        <div className="profile-container">
-            {/* Animated Background */}
-            <div className="profile-animated-bg">
-                <div className="gradient-orb orb-1"></div>
-                <div className="gradient-orb orb-2"></div>
-            </div>
-
-            {/* Mouse Follower */}
-            <motion.div
-                className="mouse-follower"
-                style={{
-                    left: springX,
-                    top: springY,
-                }}
-            />
-
-            <nav className="profile-nav">
-                <button onClick={() => navigate('/dashboard')} className="back-btn">
-                    ← Back to Dashboard
-                </button>
-                <button
-                    onClick={() => setDarkMode(!darkMode)}
-                    className="theme-toggle-ultra"
-                    aria-label="Toggle theme"
-                    style={{ marginLeft: 'auto' }}
-                >
-                    {darkMode ? <Sun size={22} /> : <Moon size={22} />}
-                </button>
-            </nav>
-
-            <div className="profile-content">
+        <DashboardLayout>
+            <div className="profile-container">
+                <div className="profile-content">
                 {/* Hero Section */}
                 <div className="profile-hero">
                     <div className="profile-hero-bg"></div>
@@ -801,6 +765,7 @@ const Profile = () => {
                 )}
             </div>
         </div>
+        </DashboardLayout>
     );
 };
 

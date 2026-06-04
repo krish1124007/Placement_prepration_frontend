@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE_URL } from '../services/api';
 import {
     Award,
     TrendingUp,
@@ -30,7 +31,7 @@ const InterviewScorecard = () => {
 
     const fetchScorecard = async () => {
         try {
-            const response = await fetch(`https://placement-prepration-backend.onrender.com/api/v1/interviews/scorecard/${sessionId}`);
+            const response = await fetch(`${API_BASE_URL}/interviews/scorecard/${sessionId}`);
             const data = await response.json();
 
             if (data.success || data.status === 200) {

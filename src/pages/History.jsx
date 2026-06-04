@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { API_BASE_URL } from '../services/api';
 import DashboardLayout from '../components/DashboardLayout';
 import {
     History as HistoryIcon,
@@ -38,7 +39,7 @@ const History = () => {
 
         try {
             const token = localStorage.getItem('InterPrepaccessToken');
-            const apiUrl = 'https://placement-prepration-backend.onrender.com/api/v1';
+            const apiUrl = API_BASE_URL;
 
             if (!token) {
                 throw new Error('Please login to view your history');

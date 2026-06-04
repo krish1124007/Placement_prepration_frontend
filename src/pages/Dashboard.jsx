@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE_URL } from '../services/api';
 import DashboardLayout from '../components/DashboardLayout';
 import InterviewSetupModal from '../components/InterviewSetupModal';
 import {
@@ -45,7 +46,7 @@ const Dashboard = () => {
     const fetchScheduledInterviews = async () => {
         try {
             // Fetch user's plans
-            const response = await fetch(`https://placement-prepration-backend.onrender.com/api/v1/plans/user/${user._id}`);
+            const response = await fetch(`${API_BASE_URL}/plans/user/${user._id}`);
             const data = await response.json();
 
             if (data.success && data.data) {

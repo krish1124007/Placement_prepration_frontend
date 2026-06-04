@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { planAPI } from '../services/api';
+import { planAPI, API_BASE_URL } from '../services/api';
 import {
     ArrowLeft,
     CheckCircle2,
@@ -79,7 +79,7 @@ const PlanRoadmap = () => {
             if (isDSA) {
                 // Create DSA interview
                 console.log('Creating DSA interview...');
-                const response = await fetch('https://placement-prepration-backend.onrender.com/api/v1/dsa-interviews/create', {
+                const response = await fetch(`${API_BASE_URL}/dsa-interviews/create`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -102,7 +102,7 @@ const PlanRoadmap = () => {
             } else {
                 // Create normal interview
                 console.log('Creating normal interview...');
-                const response = await fetch('https://placement-prepration-backend.onrender.com/api/v1/interviews/create', {
+                const response = await fetch(`${API_BASE_URL}/interviews/create`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({

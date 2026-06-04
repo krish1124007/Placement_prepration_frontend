@@ -23,6 +23,8 @@ import DSAInterview from "./pages/DSAInterview";
 import InterviewScorecard from "./pages/InterviewScorecard";
 import AIPanelInterview from "./pages/AIPanelInterview";
 import GitHubCallback from "./pages/GitHubCallback";
+import LandingPage from "./pages/LandingPage";
+import Achievements from "./pages/Achievements";
 import "./App.css";
 
 function AppContent() {
@@ -34,11 +36,19 @@ function AppContent() {
       {showOnboarding && <OnboardingAnimation onComplete={completeOnboarding} />}
       {showLogout && <LogoutAnimation onComplete={completeLogout} />}
       <Routes>
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/" element={<LandingPage />} />
         <Route path="/onboarding-test" element={<OnboardingTest />} />
         <Route path="/logout-test" element={<LogoutTest />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route
+          path="/achievements"
+          element={
+            <ProtectedRoute>
+              <Achievements />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/dashboard"
           element={

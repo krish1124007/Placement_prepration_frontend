@@ -1,0 +1,529 @@
+/* =====================================================================
+   Achievements.css — interPrep Premium Dark Theme
+   ===================================================================== */
+
+.achievements-page {
+    color: #e2e8f0;
+    font-family: 'Inter', system-ui, sans-serif;
+    padding: 10px 20px 40px;
+}
+
+.achievements-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
+}
+
+/* ── Nav ── */
+.ach-top-nav {
+    display: flex;
+    margin-bottom: -16px;
+}
+
+.ach-back-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.2s;
+    padding: 0;
+}
+
+.ach-back-btn:hover {
+    color: #f8fafc;
+}
+
+/* ── Header ── */
+.ach-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #0f1520;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 32px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+    margin-bottom: 32px;
+}
+
+.ach-header-content {
+    flex: 1;
+}
+
+.ach-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 8px;
+}
+
+.title-icon {
+    color: #10b981;
+    filter: drop-shadow(0 2px 8px rgba(16, 185, 129, 0.4));
+}
+
+.ach-title-wrap h1 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: #f8fafc;
+    margin: 0;
+    white-space: nowrap;
+}
+
+.ach-header-content p {
+    font-size: 16px;
+    color: #94a3b8;
+    margin: 0;
+}
+
+.ach-stats-container {
+    display: flex;
+    gap: 20px;
+}
+
+.ach-stat-box {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: #151c2c;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 16px 24px;
+    border-radius: 16px;
+    min-width: 160px;
+}
+
+.ach-stat-box.highlight {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.05));
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+.stat-icon-wrapper {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.stat-icon-wrapper.blue { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+.stat-icon-wrapper.green { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+.stat-icon-wrapper.orange { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+
+.stat-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-val {
+    font-size: 24px;
+    font-weight: 800;
+    color: #f8fafc;
+    line-height: 1;
+    margin-bottom: 4px;
+}
+
+.stat-lbl {
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ── Sections ── */
+.ach-section {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.section-title h2 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #f8fafc;
+    margin: 0;
+}
+
+.section-badge {
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.profile-section p {
+    color: #64748b;
+    margin: 0;
+    font-size: 15px;
+}
+
+/* ── Badges Grid ── */
+.badges-grid-premium {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 24px;
+}
+
+.premium-badge-card {
+    position: relative;
+    background: #0f1520;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 24px;
+    display: flex;
+    gap: 20px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.card-glow {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 100px; height: 100px;
+    background: radial-gradient(circle, var(--glow-color, rgba(255,255,255,0.1)), transparent 70%);
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+}
+
+.premium-badge-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--border-color, rgba(255, 255, 255, 0.2));
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+}
+
+.premium-badge-card:hover .card-glow {
+    opacity: 0.5;
+}
+
+/* Tiers */
+.premium-badge-card.gold {
+    --glow-color: rgba(245, 158, 11, 0.2);
+    --border-color: rgba(245, 158, 11, 0.5);
+}
+.premium-badge-card.silver {
+    --glow-color: rgba(148, 163, 184, 0.2);
+    --border-color: rgba(148, 163, 184, 0.5);
+}
+.premium-badge-card.bronze {
+    --glow-color: rgba(217, 119, 6, 0.2);
+    --border-color: rgba(217, 119, 6, 0.5);
+}
+
+/* Locked state */
+.premium-badge-card.locked-card {
+    opacity: 0.5;
+    filter: grayscale(100%);
+    background: #0a0f18;
+}
+.premium-badge-card.locked-card:hover {
+    transform: none;
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: none;
+}
+.premium-badge-card.locked-card .card-glow { display: none; }
+
+.badge-icon-area {
+    display: flex;
+    align-items: flex-start;
+}
+
+.icon-hex {
+    width: 64px; height: 64px;
+    background: #151c2c;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+}
+
+.gold .icon-hex { color: #f59e0b; background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.3); }
+.silver .icon-hex { color: #cbd5e1; background: rgba(148, 163, 184, 0.1); border-color: rgba(148, 163, 184, 0.3); }
+.bronze .icon-hex { color: #d97706; background: rgba(217, 119, 6, 0.1); border-color: rgba(217, 119, 6, 0.3); }
+
+.badge-content-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    z-index: 1;
+}
+
+.badge-content-area h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #f8fafc;
+    margin: 0 0 8px 0;
+}
+
+.badge-content-area p {
+    font-size: 14px;
+    color: #94a3b8;
+    line-height: 1.5;
+    margin: 0 0 16px 0;
+    flex: 1;
+}
+
+.badge-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.badge-date {
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.badge-xp {
+    font-size: 12px;
+    font-weight: 700;
+    color: #10b981;
+    background: rgba(16, 185, 129, 0.1);
+    padding: 4px 8px;
+    border-radius: 8px;
+}
+
+/* ── Profile Achievements Timeline ── */
+.profile-ach-content {
+    background: #0f1520;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 32px;
+}
+
+.timeline-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.timeline-item {
+    display: flex;
+    gap: 24px;
+    position: relative;
+    padding-bottom: 32px;
+}
+
+.timeline-item:last-child {
+    padding-bottom: 0;
+}
+
+.timeline-marker {
+    position: relative;
+    width: 16px;
+    display: flex;
+    justify-content: center;
+}
+
+.timeline-marker::after {
+    content: '';
+    position: absolute;
+    top: 24px;
+    bottom: -8px;
+    width: 2px;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.timeline-item:last-child .timeline-marker::after {
+    display: none;
+}
+
+.marker-core {
+    width: 16px; height: 16px;
+    background: #10b981;
+    border: 3px solid #0f1520;
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.3);
+    position: relative;
+    z-index: 2;
+    margin-top: 4px;
+}
+
+.timeline-content {
+    flex: 1;
+    background: #151c2c;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    padding: 20px 24px;
+    border-radius: 16px;
+    transition: transform 0.2s, border-color 0.2s;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.timeline-content:hover {
+    transform: translateX(4px);
+    border-color: rgba(16, 185, 129, 0.2);
+}
+
+.timeline-text {
+    font-size: 15px;
+    color: #e2e8f0;
+    line-height: 1.6;
+}
+
+.delete-milestone-btn {
+    background: transparent;
+    border: none;
+    color: #64748b;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 6px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.delete-milestone-btn:hover {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+}
+
+/* ── Add Form ── */
+.add-milestone-form {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 32px;
+}
+
+.add-milestone-form input {
+    flex: 1;
+    background: #151c2c;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 14px 20px;
+    color: #f8fafc;
+    font-size: 15px;
+    transition: border-color 0.2s;
+}
+
+.add-milestone-form input:focus {
+    outline: none;
+    border-color: #10b981;
+}
+
+.add-milestone-form button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #10b981;
+    color: #060810;
+    border: none;
+    padding: 0 24px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.add-milestone-form button:hover:not(:disabled) {
+    background: #0ea5e9;
+    transform: translateY(-2px);
+}
+
+.add-milestone-form button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Empty State */
+.empty-achievements {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 48px 20px;
+}
+
+.empty-icon {
+    width: 80px; height: 80px;
+    background: rgba(255, 255, 255, 0.05);
+    color: #64748b;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 20px;
+}
+
+.empty-achievements h3 {
+    font-size: 20px;
+    color: #f8fafc;
+    margin: 0 0 12px 0;
+}
+
+.empty-achievements p {
+    color: #94a3b8;
+    max-width: 400px;
+    margin: 0 0 24px 0;
+    line-height: 1.6;
+}
+
+.add-ach-btn {
+    background: rgba(255, 255, 255, 0.08);
+    color: #f8fafc;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.add-ach-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+/* ── Responsive ── */
+@media (max-width: 1024px) {
+    .ach-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 32px;
+    }
+    .ach-stats-container {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
+
+@media (max-width: 768px) {
+    .ach-stats-container {
+        flex-direction: column;
+        gap: 12px;
+    }
+    .ach-stat-box {
+        width: 100%;
+    }
+    .badges-grid-premium {
+        grid-template-columns: 1fr;
+    }
+    .premium-badge-card {
+        padding: 20px;
+        flex-direction: column;
+    }
+}
